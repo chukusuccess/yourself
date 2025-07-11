@@ -9,15 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@ant-design/plots": "^2.3.1",
+    "@ant-design/pro-layout": "^7.19.7",
+    "antd": "^5.17.3",
+    "appwrite": "^13.0.2",
+    "axios": "^1.7.2",
+    "dayjs": "^1.11.13",
+    "framer-motion": "^11.0.15",
+    "next": "15.3.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.5"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4"
   }
 }

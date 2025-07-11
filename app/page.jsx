@@ -1,78 +1,39 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Splash from "./components/Splash";
+import { motion } from "framer-motion";
+import { TRANSLATIONS } from "./resources/constants";
+import { findMatchingLocale } from "./resources/utils";
+import { Button, DatePicker, Divider } from "antd";
+import dayjs from "dayjs";
+import {
+  animationOne,
+  fadeIn,
+  animationTwo,
+  animationThree,
+  animationFour,
+} from "./resources/animation";
 
-const TRANSLATIONS = {
-  "en-US": {
-    "pageTitle": "Yourself",
-    "pageSubtitle": "A simple visualization to reflect on the passage of time",
-    "birthDateQuestion": "Enter a birthdate",
-    "visualizeButton": "Visualize your time",
-    "startOverButton": "Start over",
-    "lifeInWeeksTitle": "Your life in weeks",
-    "weekHoverPast": " A week from your past",
-    "weekHoverCurrent": " Your current week",
-    "weekHoverFuture": " A week in your potential future",
-    "legendPast": "Past",
-    "legendPresent": "Present",
-    "legendFuture": "Future",
-    "lifeHighlightsTitle": "Life highlights",
-    "lifeHighlightsWeeks": "You've lived",
-    "lifeHighlightsWeeksEnd": "weeks, which is",
-    "lifeHighlightsPercent": "of a full life.",
-    "lifeHighlightsDays": "That's",
-    "lifeHighlightsDaysEnd": "days of experience and approximately",
-    "lifeHighlightsSeasonsEnd": "seasons observed.",
-    "lifeHighlightsHeartbeats": "Your heart has beaten approximately",
-    "lifeHighlightsHeartbeatsEnd": "times.",
-    "lifeHighlightsBreaths": "You've taken around",
-    "lifeHighlightsBreathsMiddle": "breaths and slept about",
-    "lifeHighlightsBreathsEnd": "hours.",
-    "societalContextTitle": "Societal context",
-    "societalPopulation":
-      "During your lifetime, humanity's population has grown from",
-    "societalPopulationEnd": "to over",
-    "societalPopulationFinal": "billion people.",
-    "societalMeetings": "The average person will meet around",
-    "societalMeetingsMiddle":
-      "people in their lifetime. You've likely already met approximately",
-    "societalMeetingsEnd": "individuals.",
-    "societalBirthsDeaths":
-      "Since your birth, humanity has collectively experienced approximately",
-    "societalBirthsMiddle": "births and",
-    "societalDeathsEnd": "deaths.",
-    "cosmicPerspectiveTitle": "Cosmic perspective",
-    "cosmicEarthTravel": "Since your birth, Earth has traveled approximately",
-    "cosmicEarthTravelEnd": "kilometers through space around the Sun.",
-    "cosmicUniverse": "The observable universe is about",
-    "cosmicUniverseMiddle": "billion light-years across, meaning light takes",
-    "cosmicUniverseMiddle2":
-      "billion years to cross it. Your entire lifespan is just",
-    "cosmicUniverseEnd": "of the universe's age.",
-    "cosmicSolarSystem":
-      "During your lifetime, our solar system has moved about",
-    "cosmicSolarSystemEnd": "kilometers through the Milky Way galaxy.",
-    "naturalWorldTitle": "Natural world",
-    "naturalLunarCycles": "You've experienced approximately",
-    "naturalLunarMiddle": "lunar cycles and",
-    "naturalLunarEnd": "trips around the Sun.",
-    "naturalSequoia":
-      "A giant sequoia tree can live over 3,000 years. Your current age is",
-    "naturalSequoiaEnd": "of its potential lifespan.",
-    "naturalCells":
-      "During your lifetime, your body has replaced most of its cells several times. You are not made of the same atoms you were born with.",
-  },
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
+const customFormat = (value) => {
+  if (!value) return "";
+  const day = value.date();
+  const daySuffix =
+    day % 10 === 1 && day !== 11
+      ? "st"
+      : day % 10 === 2 && day !== 12
+      ? "nd"
+      : day % 10 === 3 && day !== 13
+      ? "rd"
+      : "th";
+  return `${day}${daySuffix} ${value.format("MMMM, YYYY")}`;
 };
 
 const appLocale = "{{APP_LOCALE}}";
 const browserLocale = navigator.languages?.[0] || navigator.language || "en-US";
-const findMatchingLocale = (locale) => {
-  if (TRANSLATIONS[locale]) return locale;
-  const lang = locale.split("-")[0];
-  const match = Object.keys(TRANSLATIONS).find((key) =>
-    key.startsWith(lang + "-")
-  );
-  return match || "en-US";
-};
+
 const locale =
   appLocale !== "{{APP_LOCALE}}"
     ? findMatchingLocale(appLocale)
@@ -81,11 +42,45 @@ const t = (key) =>
   TRANSLATIONS[locale]?.[key] || TRANSLATIONS["en-US"][key] || key;
 
 export default function Home() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [birthdate, setBirthdate] = useState("");
   const [stats, setStats] = useState(null);
   const [showHoverData, setShowHoverData] = useState(false);
   const [hoverWeek, setHoverWeek] = useState(null);
+  const [displayedText, setDisplayedText] = useState("");
+  const text = t("pageSubtitle");
+  const speed = 40;
+
+  useEffect(() => {
+    let timeoutId = null;
+    let typingTimeoutId = null;
+    let i = 0;
+
+    const type = () => {
+      if (i < text.length) {
+        setDisplayedText(text.slice(0, i + 1));
+        i++;
+        timeoutId = setTimeout(type, speed);
+      }
+    };
+
+    // Delay the start by 3 seconds
+    typingTimeoutId = setTimeout(() => {
+      type();
+      handleReset();
+    }, 4000);
+
+    // Cleanup both timeouts
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(typingTimeoutId);
+    };
+  }, [text]);
+
+  const handleChange = (date, dateString) => {
+    setBirthdate(date); // stores as dayjs object
+    console.log("Selected Date:", dateString);
+  };
 
   const calculateStats = (date) => {
     const birthDate = new Date(date);
@@ -428,35 +423,50 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen">
-      <div className="bg-gray-50 min-h-screen pt-16">
+      <Splash />
+      <div className="bg-gray-50 min-h-screen pt-16 px-8">
         <div>
-          <h1 className="text-2xl font-normal text-gray-800 mb-2">
+          <motion.h1
+            variants={fadeIn("up", "tween", 2.5, 3)}
+            initial="hidden"
+            animate="show"
+            className="text-2xl text-center font-normal text-gray-800 mb-2"
+          >
             {t("pageTitle")}
-          </h1>
-          <p className="text-gray-600 mb-8">{t("pageSubtitle")}</p>
-
+          </motion.h1>
+          <br />
+          <p className="text-gray-600 text-center mb-8">{displayedText}</p>
+          <br />
           {step === 1 ? (
-            <div className="bg-white p-6 rounded-md shadow-sm">
+            <motion.div
+              variants={animationThree}
+              initial="hidden"
+              animate="visible"
+              className="bg-white p-6 rounded-md shadow-sm"
+            >
               <h2 className="text-lg font-normal mb-4 text-gray-800">
                 {t("birthDateQuestion")}
               </h2>
               <div>
-                <input
-                  type="date"
-                  className="w-full p-2 border border-gray-300 rounded-md mb-4 text-gray-800"
-                  value={birthdate}
-                  onChange={(e) => setBirthdate(e.target.value)}
-                  required
+                <DatePicker
+                  size="large"
+                  format={customFormat}
+                  onChange={handleChange}
+                  placeholder="Select birthdate"
+                  style={{ width: "100%" }}
                 />
-                <button
+                <Divider />
+                <Button
+                  size="large"
+                  type="primary"
                   onClick={handleSubmit}
-                  className="w-full bg-gray-800 text-white py-2 rounded-md hover:bg-gray-700 transition-colors"
+                  className="w-full h-16 bg-[#5a5753] text-[#eee5dc] rounded-full hover:bg-gray-500 transition-colors"
                   disabled={!birthdate}
                 >
                   {t("visualizeButton")}
-                </button>
+                </Button>
               </div>
-            </div>
+            </motion.div>
           ) : (
             <>
               {renderWeekGrid()}
