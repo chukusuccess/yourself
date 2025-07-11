@@ -15,6 +15,7 @@ import {
 } from "./resources/animation";
 
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import Image from "next/image";
 
 dayjs.extend(customParseFormat);
 const customFormat = (value) => {
@@ -424,18 +425,29 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen">
       <Splash />
-      <div className="bg-gray-50 min-h-screen pt-16 px-8">
+      <div className="bg-gray-50 min-h-screen pt-16 px-6">
         <div>
+          <div className="w-full flex items-center justify-center">
+            <Image
+              className="w-2/3 h-auto sm:w-1/2 lg:w-1/3 sm:h-auto"
+              src={"/silhouette.png"}
+              alt="cover"
+              width={1000}
+              height={1000}
+            />
+          </div>
           <motion.h1
             variants={fadeIn("up", "tween", 2.5, 3)}
             initial="hidden"
             animate="show"
-            className="text-2xl text-center font-normal text-gray-800 mb-2"
+            className="text-2xl text-center font-normal mb-2"
           >
             {t("pageTitle")}
           </motion.h1>
           <br />
-          <p className="text-gray-600 text-center mb-8">{displayedText}</p>
+          <p className="text-gray-400 text-sm text-center mb-8">
+            {displayedText}
+          </p>
           <br />
           {step === 1 ? (
             <motion.div
@@ -444,7 +456,7 @@ export default function Home() {
               animate="visible"
               className="bg-white p-6 rounded-md shadow-sm"
             >
-              <h2 className="text-lg font-normal mb-4 text-gray-800">
+              <h2 className="font-normal mb-4 text-gray-800 text-center">
                 {t("birthDateQuestion")}
               </h2>
               <div>
