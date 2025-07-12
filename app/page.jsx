@@ -472,13 +472,23 @@ export default function Home() {
       <div className="bg-gray-50 min-h-screen pt-16 px-4">
         <div>
           <div className="w-full flex items-center justify-center">
-            <Image
-              className="w-2/3 h-auto sm:w-1/2 lg:w-1/3 sm:h-auto"
-              src={"/silhouette.png"}
-              alt="cover"
-              width={1000}
-              height={1000}
-            />
+            {currentPage === "guest" ? (
+              <Image
+                className="w-1/3 mb-2 h-auto sm:w-1/2 lg:w-1/3 sm:h-auto"
+                src={"/pocketwatch.png"}
+                alt="cover"
+                width={1000}
+                height={1000}
+              />
+            ) : (
+              <Image
+                className="w-2/3 h-auto sm:w-1/2 lg:w-1/3 sm:h-auto"
+                src={"/silhouette.png"}
+                alt="cover"
+                width={1000}
+                height={1000}
+              />
+            )}
           </div>
           <motion.h1
             variants={fadeIn("up", "tween", 2.5, 3)}
