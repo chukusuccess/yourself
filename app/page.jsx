@@ -463,7 +463,7 @@ export default function Home() {
     setStats(null);
     setStep(1);
     setCurrentPage("");
-    router.push("/user=");
+    router.push("/?user=");
   };
 
   return (
