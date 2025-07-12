@@ -12,6 +12,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { AntThemeProvider } from "./contexts/ThemeProvider";
+import { Suspense } from "react";
 
 const lexend = Lexend({
   subsets: ["latin", "latin-ext", "vietnamese"],
@@ -51,7 +52,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${lexend.className} antialiased`}>
-        <AntThemeProvider>{children}</AntThemeProvider>
+        <AntThemeProvider>
+          <Suspense fallback={<span>Loading...</span>}>{children}</Suspense>
+        </AntThemeProvider>
         {/* {children} */}
       </body>
     </html>
