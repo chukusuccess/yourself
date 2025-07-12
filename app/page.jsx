@@ -221,7 +221,7 @@ export default function Home() {
           if (isPast) {
             cellClass += "bg-gray-800 ";
           } else if (isCurrent) {
-            cellClass += "bg-blue-500 scale-110 animate-pulse";
+            cellClass += "bg-blue-500 scale-200 animate-pulse";
           } else {
             cellClass += "bg-gray-200 ";
           }
@@ -302,7 +302,7 @@ export default function Home() {
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("lifeHighlightsTitle")}
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 text-xs">
             <p className="text-gray-600">
               {t("lifeHighlightsWeeks")}{" "}
               <span className="text-gray-900 font-medium">
@@ -350,7 +350,7 @@ export default function Home() {
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("societalContextTitle")}
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 text-xs">
             <p className="text-gray-600">
               {t("societalPopulation")}{" "}
               {stats.birthYear ? (
@@ -393,11 +393,11 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        {/* <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("cosmicPerspectiveTitle")}
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 text-xs">
             <p className="text-gray-600">
               {t("cosmicEarthTravel")}{" "}
               <span className="text-gray-900 font-medium">
@@ -432,7 +432,7 @@ export default function Home() {
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("naturalWorldTitle")}
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-4 text-xs">
             <p className="text-gray-600">
               {t("naturalLunarCycles")}{" "}
               <span className="text-gray-900 font-medium">
@@ -453,7 +453,7 @@ export default function Home() {
             </p>
             <p className="text-gray-600">{t("naturalCells")}</p>
           </div>
-        </div>
+        </div> */}
       </div>
     );
   };
