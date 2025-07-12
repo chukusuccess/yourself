@@ -13,6 +13,7 @@ import {
 import "./globals.css";
 import { AntThemeProvider } from "./contexts/ThemeProvider";
 import { Suspense } from "react";
+import { Spin } from "antd";
 
 const lexend = Lexend({
   subsets: ["latin", "latin-ext", "vietnamese"],
@@ -53,7 +54,15 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${lexend.className} antialiased`}>
         <AntThemeProvider>
-          <Suspense fallback={<span>Loading...</span>}>{children}</Suspense>
+          <Suspense
+            fallback={
+              <div className="w-screen h-screen flex items-center justify-center">
+                <Spin />
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
         </AntThemeProvider>
         {/* {children} */}
       </body>

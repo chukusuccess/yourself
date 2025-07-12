@@ -1,6 +1,7 @@
 // LifeStats.jsx
 "use client";
 import React from "react";
+import PremiumAdCard from "./PremiumAdCard";
 
 const getFormattedNumber = (num) => new Intl.NumberFormat().format(num);
 
@@ -109,6 +110,8 @@ const LifeStats = ({
           </p>
         </div>
       </div>
+
+      <PremiumAdCard />
     </div>
   );
 };
