@@ -4,7 +4,7 @@ import Splash from "./components/Splash";
 import { motion } from "framer-motion";
 import { TRANSLATIONS } from "./resources/constants";
 import { findMatchingLocale } from "./resources/utils";
-import { Button, DatePicker, Divider } from "antd";
+import { Button, DatePicker, Divider, Tooltip } from "antd";
 import dayjs from "dayjs";
 import {
   animationOne,
@@ -13,6 +13,7 @@ import {
   animationThree,
   animationFour,
 } from "./resources/animation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import Image from "next/image";
@@ -49,8 +50,39 @@ export default function Home() {
   const [showHoverData, setShowHoverData] = useState(false);
   const [hoverWeek, setHoverWeek] = useState(null);
   const [displayedText, setDisplayedText] = useState("");
+  const [currentPage, setCurrentPage] = useState("");
+
+  const searchParams = useSearchParams();
+  const freemium = searchParams.get("user");
+
+  const router = useRouter();
+
   const text = t("pageSubtitle");
+  const text2 = t("guestPageSubtitle");
   const speed = 40;
+
+  useEffect(() => {
+    if (freemium === "guest") {
+      setCurrentPage(freemium);
+      let timeoutId = null;
+      let i = 0;
+
+      const type = () => {
+        if (i < text2.length) {
+          setDisplayedText(text2.slice(0, i + 1));
+          i++;
+          timeoutId = setTimeout(type, speed);
+        }
+      };
+
+      type();
+
+      // Cleanup timeout
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [freemium]);
 
   useEffect(() => {
     let timeoutId = null;
@@ -79,8 +111,7 @@ export default function Home() {
   }, [text]);
 
   const handleChange = (date, dateString) => {
-    setBirthdate(date); // stores as dayjs object
-    console.log("Selected Date:", dateString);
+    setBirthdate(date);
   };
 
   const calculateStats = (date) => {
@@ -164,6 +195,7 @@ export default function Home() {
   const handleSubmit = () => {
     setStats(calculateStats(birthdate));
     setStep(2);
+    router.push("/?user=guest");
   };
 
   const getFormattedNumber = (num) => {
@@ -185,41 +217,51 @@ export default function Home() {
           const isPast = weekNumber < stats.weeksLived;
           const isCurrent = weekNumber === stats.weeksLived;
 
-          let cellClass = "w-2 h-2 m-0.5 rounded-sm transition-all ";
+          let cellClass = "w-1 h-1 mb-0.25 rounded-full transition-all ";
           if (isPast) {
             cellClass += "bg-gray-800 ";
           } else if (isCurrent) {
-            cellClass += "bg-blue-500 animate-pulse ";
+            cellClass += "bg-blue-500 scale-110 animate-pulse";
           } else {
             cellClass += "bg-gray-200 ";
           }
 
           weekCells.push(
-            <div
+            <Tooltip
+              open={isCurrent ? true : false}
+              placement="bottom"
+              autoAdjustOverflow={false}
+              title={isCurrent ? "Now" : null}
+              color={"#5a5753"}
               key={weekNumber}
-              className={cellClass}
-              onMouseEnter={() => {
-                setHoverWeek(weekNumber);
-                setShowHoverData(true);
-              }}
-              onMouseLeave={() => setShowHoverData(false)}
-            />
+            >
+              <div
+                key={weekNumber}
+                className={cellClass}
+                onMouseEnter={() => {
+                  setHoverWeek(weekNumber);
+                  setShowHoverData(true);
+                }}
+                onMouseLeave={() => setShowHoverData(false)}
+              />
+            </Tooltip>
           );
         }
       }
 
       rows.push(
-        <div key={row} className="flex">
+        <div
+          key={row}
+          className="flex items-center justify-between max-w-screen"
+        >
           {weekCells}
         </div>
       );
     }
 
     return (
-      <div className="mt-8 max-w-screen bg-white p-6 rounded-md shadow-sm">
-        <h2 className="text-lg font-normal mb-4 text-gray-800">
-          {t("lifeInWeeksTitle")}
-        </h2>
+      <div className="max-w-screen bg-white p-4 rounded-xl shadow-sm">
+        <h2 className="text-sm font-normal mb-4">{t("lifeInWeeksTitle")}</h2>
         <div className="flex flex-col">{rows}</div>
 
         {showHoverData && (
@@ -235,16 +277,16 @@ export default function Home() {
 
         <div className="flex mt-6 text-sm">
           <div className="flex items-center mr-4">
-            <div className="w-3 h-3 bg-gray-800 mr-2"></div>
-            <span className="text-gray-600">{t("legendPast")}</span>
+            <div className="w-3 h-3 rounded-full bg-gray-800 mr-2"></div>
+            <span>{t("legendPast")}</span>
           </div>
           <div className="flex items-center mr-4">
-            <div className="w-3 h-3 bg-blue-500 mr-2"></div>
-            <span className="text-gray-600">{t("legendPresent")}</span>
+            <div className="w-3 h-3 rounded-full animate-pulse bg-blue-500 mr-2"></div>
+            <span>{t("legendPresent")}</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-gray-200 mr-2"></div>
-            <span className="text-gray-600">{t("legendFuture")}</span>
+            <div className="w-3 h-3 rounded-full bg-gray-200 mr-2"></div>
+            <span>{t("legendFuture")}</span>
           </div>
         </div>
       </div>
@@ -256,7 +298,7 @@ export default function Home() {
 
     return (
       <div className="max-w-screen mt-8 space-y-6">
-        <div className="bg-white p-6 rounded-md shadow-sm">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("lifeHighlightsTitle")}
           </h2>
@@ -304,7 +346,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-md shadow-sm">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("societalContextTitle")}
           </h2>
@@ -351,7 +393,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-md shadow-sm">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("cosmicPerspectiveTitle")}
           </h2>
@@ -386,7 +428,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-md shadow-sm">
+        <div className="bg-white p-6 rounded-xl shadow-sm">
           <h2 className="text-lg font-normal mb-4 text-gray-800">
             {t("naturalWorldTitle")}
           </h2>
@@ -420,12 +462,14 @@ export default function Home() {
     setBirthdate("");
     setStats(null);
     setStep(1);
+    setCurrentPage("");
+    router.push("/user=");
   };
 
   return (
     <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen">
       <Splash />
-      <div className="bg-gray-50 min-h-screen pt-16 px-6">
+      <div className="bg-gray-50 min-h-screen pt-16 px-4">
         <div>
           <div className="w-full flex items-center justify-center">
             <Image
@@ -442,7 +486,7 @@ export default function Home() {
             animate="show"
             className="text-2xl text-center font-normal mb-2"
           >
-            {t("pageTitle")}
+            {currentPage === "guest" ? t("guestPageTitle") : t("pageTitle")}
           </motion.h1>
           <br />
           <p className="text-gray-400 text-sm text-center mb-8">
@@ -483,12 +527,14 @@ export default function Home() {
             <>
               {renderWeekGrid()}
               {renderStats()}
-              <button
+              <Button
+                size="large"
+                type="primary"
                 onClick={handleReset}
-                className="mt-8 w-full bg-gray-200 text-gray-800 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                className="my-8 w-full h-16 bg-[#5a5753] text-[#eee5dc] rounded-full hover:bg-gray-500 transition-colors"
               >
                 {t("startOverButton")}
-              </button>
+              </Button>
             </>
           )}
         </div>
