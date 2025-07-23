@@ -191,9 +191,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen">
+    <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen sm:w-1/3">
       <Splash />
-      <div className="bg-gray-50 min-h-screen pt-16 px-4">
+      <div className="min-h-screen pt-16 px-4">
         <div>
           <motion.div
             key={currentPage} // important to trigger animation when page changes

@@ -19,7 +19,7 @@ function SplashText() {
       className="flex flex-col items-center justify-center w-full h-full"
     >
       <Image
-        className="w-2/5 h-auto sm:w-1/2 lg:w-1/3 sm:h-auto"
+        className="w-2/5 h-auto sm:w-1/5 sm:h-auto"
         src={"/bg.png"}
         alt="cover"
         width={1000}

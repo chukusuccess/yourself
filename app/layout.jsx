@@ -52,7 +52,9 @@ export const loversQuarrel = Lovers_Quarrel({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${lexend.className} antialiased`}>
+      <body
+        className={`${lexend.className} antialiased bg-gray-50 flex flex-col items-center`}
+      >
         <AntThemeProvider>
           <Suspense
             fallback={

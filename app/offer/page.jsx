@@ -7,7 +7,7 @@ import OfferCard from "../components/OfferCard";
 const PremiumOffer = () => {
   const router = useRouter();
   return (
-    <div className="p-6 bg-[#f0f0f0]">
+    <div className="p-6 sm:w-1/3">
       <h2 className="text-xl font-bold mb-4 w-full text-center">
         Upgrade to Premium
       </h2>
@@ -37,7 +37,7 @@ const PremiumOffer = () => {
           <ul className="flex flex-col items-start justify-start gap-2 pl-4 list-disc">
             <li>All standard features</li>
             <li>Advanced stat insights</li>
-            <li>Habit tracking tracking & Streaks</li>
+            <li>Habit tracking & Streaks</li>
             <li>Daily wisdom feed</li>
             <li>Priority support</li>
           </ul>
