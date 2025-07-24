@@ -179,7 +179,7 @@ const CreateNewTimeCapsule = () => {
                 type="primary"
                 icon={<AudioFilled />}
                 onClick={startListening}
-                className="px-4 py-2 rounded bg-black text-white text-sm"
+                className="px-4 py-2 bg-black text-white text-sm"
               >
                 Speak
               </Button>
@@ -196,11 +196,12 @@ const CreateNewTimeCapsule = () => {
             )}
             <Button
               htmlType="button"
+              icon={<CloseOutlined />}
               type="default"
               onClick={clearText}
               className="px-4 py-2 rounded bg-gray-300 text-black text-sm"
             >
-              ❌ Clear
+              Clear
             </Button>
           </div>
         </Form.Item>
@@ -238,7 +239,12 @@ const CreateNewTimeCapsule = () => {
             maxCount={1}
             listType="text"
           >
-            <Button type="default" htmlType="button" icon={<AudioOutlined />}>
+            <Button
+              className="w-full"
+              type="default"
+              htmlType="button"
+              icon={<AudioOutlined />}
+            >
               Upload Audio
             </Button>
           </Upload>
@@ -247,13 +253,7 @@ const CreateNewTimeCapsule = () => {
         {/* Future: Audio-to-text conversion area can be added here */}
 
         <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            block
-            loading={loading}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
+          <Button type="primary" htmlType="submit" block loading={loading}>
             Save Capsule
           </Button>
         </Form.Item>

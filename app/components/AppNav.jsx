@@ -18,7 +18,7 @@ const AppNavbar = () => {
   ];
 
   return (
-    <header className="w-full fixed top-0 z-50 px-8 py-3 shadow-sm bg-white flex items-center justify-between">
+    <header className="w-full fixed top-0 z-50 px-6 py-3 shadow-sm bg-white flex items-center justify-between">
       <Link href="/" className="text-xl font-bold text-gray-800">
         Yourself.
       </Link>
