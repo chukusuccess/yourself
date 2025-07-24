@@ -259,7 +259,7 @@ const CreateNewTimeCapsule = () => {
         </Form.Item>
       </Form>
 
-      <div className="text-3xl font-bold mt-10 text-center text-gray-700">
+      <div className="text-2xl font-bold mt-8 text-center text-gray-700">
         <span className="opacity-50">From</span>{" "}
         <span className="text-black">You</span>
       </div>

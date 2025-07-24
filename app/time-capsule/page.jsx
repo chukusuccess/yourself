@@ -70,7 +70,7 @@ const TimeCapsule = () => {
         })}
       </div>
 
-      <div className="flex flex-col gap-2 fixed bottom-10 text-4xl font-bold bg-[#f0f0f0] pt-6 w-full">
+      <div className="flex flex-col fixed bottom-8 text-2xl font-bold bg-[#f0f0f0] pt-6 w-full">
         <span className="opacity-50">From You</span>
         <span>To You.</span>
       </div>

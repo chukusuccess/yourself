@@ -14,6 +14,7 @@ import "./globals.css";
 import { AntThemeProvider } from "./contexts/ThemeProvider";
 import { Suspense } from "react";
 import { Spin } from "antd";
+import AppNavbar from "./components/AppNav";
 
 const lexend = Lexend({
   subsets: ["latin", "latin-ext", "vietnamese"],
@@ -63,6 +64,8 @@ export default function RootLayout({ children }) {
               </div>
             }
           >
+            <AppNavbar />
+            <span className="mb-16" />
             {children}
           </Suspense>
         </AntThemeProvider>
