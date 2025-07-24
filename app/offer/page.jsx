@@ -31,7 +31,7 @@ const PremiumOffer = () => {
         <OfferCard
           offerTitle={"Yourself Premium"}
           price={"£2.99"}
-          discount={" | £24/year"}
+          discount={"£24/year"}
           routineBilling={"Billed annually at £24"}
         >
           <ul className="flex flex-col items-start justify-start gap-2 pl-4 list-disc">
@@ -53,9 +53,9 @@ const PremiumOffer = () => {
       <Divider />
       <p className="w-full mb-4 px-8 text-center text-xs">
         By tapping "Upgrade Now", you agree to our{" "}
-        <span className="text-blue-500">Terms of Service</span> and{" "}
-        <span className="text-blue-500">Privacy Policy</span>. Your subscription
-        will auto-renew unless cancelled.
+        <span className="text-[#bf9b30] font-bold">Terms of Service</span> and{" "}
+        <span className="text-[#bf9b30] font-bold">Privacy Policy</span>. Your
+        subscription will auto-renew unless cancelled.
       </p>
       <Divider />
       <Button

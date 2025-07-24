@@ -7,23 +7,34 @@ import { PlusOutlined } from "@ant-design/icons";
 
 const dummyData = [
   {
-    countdown: "View in 35 weeks",
-    month: "Written: July 2025.",
-    messageTitle: "First major move",
+    title: "Your First Birthday",
+    from: "Dad",
+    to: "You",
+    dateWritten: "July 15, 2025",
+    unlockDate: "2025-07-20",
+    messageText: "Happy 18th birthday! I’m so proud of you...",
+    image: "/uploads/photo.jpg",
+    audio: "/uploads/voice.mp3",
+  },
+  {
+    from: "Mum",
+    to: "You",
+    dateWritten: "July 15, 2025",
+    unlockDate: "2025-07-20",
+    messageText: "Happy 18th birthday! I’m so proud of you...",
+    image: "/uploads/photo.jpg",
+    audio: "/uploads/voice.mp3",
+  },
+  {
+    title: "Congrats",
+    from: "You",
+    to: "You",
+    dateWritten: "July 15, 2025",
+    unlockDate: "2025-07-30",
     messageText:
       "As I write this letter, I'm filled with curiousity about where life has taken us over the past year. Remember...",
-  },
-  {
-    countdown: "View in 1 week",
-    month: "Written: July 2025.",
-    messageTitle: "Retirement",
-    messageText: "Congrats on coming this far",
-  },
-  {
-    countdown: "View in 110 weeks",
-    month: "Written: July 2025.",
-    messageTitle: "Children",
-    messageText: "I know you still eat junk 😏",
+    image: "/uploads/photo.jpg",
+    audio: "/uploads/voice.mp3",
   },
 ];
 
@@ -53,13 +64,7 @@ const TimeCapsule = () => {
               transition={{ delay: index * 0.1, duration: 0.4 }}
               className="w-full"
             >
-              <TimeCapsuleCard
-                key={index}
-                countdown={item.countdown}
-                month={item.month}
-                messageTitle={item.messageTitle}
-                messageText={item.messageText}
-              />
+              <TimeCapsuleCard key={index} capsule={item} />
             </motion.div>
           );
         })}

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 const PremiumAdCard = () => {
   const router = useRouter();
   return (
-    <div className="bg-gradient-to-br from-blue-500 to bg-pink-500 p-8 rounded-xl shadow-sm">
+    <div className="bg-gradient-to-br from-black to bg-[#ffd700] p-8 rounded-xl shadow-sm">
       <h2 className="text-2xl font-bold mb-4 text-white flex gap-3 items-center">
         <RiseOutlined className="font-bold text-4xl" />
         Unlock Your Full Potential
