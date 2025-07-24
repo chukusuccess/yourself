@@ -102,7 +102,7 @@ const WeeklyCheckIn = () => {
         })}
       </div>
 
-      <div className="flex flex-col fixed bottom-8 text-2xl font-bold bg-[#f0f0f0] pt-6 w-full">
+      <div className="flex flex-col fixed bottom-0 text-2xl font-bold bg-[#f0f0f0] py-4 w-full">
         <span className="opacity-50">Weekly</span>
         <span>Check-in.</span>
       </div>

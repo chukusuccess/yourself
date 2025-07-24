@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
-import { Drawer, Button } from "antd";
+import { Drawer, Button, Divider } from "antd";
 
 const AppNavbar = () => {
   const [open, setOpen] = useState(false);
@@ -12,7 +12,7 @@ const AppNavbar = () => {
   const navLinks = [
     { label: "Home", path: "/" },
     { label: "Create Time Capsule", path: "/create-time-capsule" },
-    { label: "Time Capsules", path: "/time-capsule" },
+    { label: "See Time Capsules", path: "/time-capsule" },
     { label: "Weekly Check-In", path: "/weekly-check-in" },
     { label: "Subscribe", path: "/offer" },
   ];
@@ -39,17 +39,19 @@ const AppNavbar = () => {
         />
       </div>
 
-      <Drawer placement="right" onClose={toggleDrawer} open={open} title="Menu">
-        <ul className="flex flex-col">
+      <Drawer placement="right" onClose={toggleDrawer} open={open} title="">
+        <ul className="flex flex-col decoration-0 list-none">
           {navLinks.map((link) => (
-            <li key={link.path}>
+            <li className="decoration-0 list-none" key={link.path}>
               <Link
+                style={{ color: "#1e2939" }}
                 href={link.path}
                 onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-gray-800 hover:bg-gray-100"
+                className="block"
               >
                 {link.label}
               </Link>
+              <Divider />
             </li>
           ))}
         </ul>
