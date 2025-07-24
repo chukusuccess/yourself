@@ -6,8 +6,8 @@ import {
   AudioFilled,
   AudioOutlined,
   CloseOutlined,
-  CloseSquareFilled,
   InboxOutlined,
+  PauseCircleFilled,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
@@ -22,6 +22,10 @@ const CreateNewTimeCapsule = () => {
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef(null);
 
+  const isMobile = () =>
+    typeof navigator !== "undefined" &&
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   const initSpeechRecognition = () => {
     const SpeechRecognition =
       typeof window !== "undefined" &&
@@ -33,24 +37,33 @@ const CreateNewTimeCapsule = () => {
     recognition.interimResults = true;
     recognition.continuous = true;
 
+    let lastFinal = ""; // Track last spoken sentence
+
     recognition.onresult = (event) => {
       let finalTranscript = "";
       let interim = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
+        const transcript = event.results[i][0].transcript.trim();
 
         if (event.results[i].isFinal) {
-          finalTranscript += autoPunctuate(transcript.trim()) + " ";
+          const punctuated = autoPunctuate(transcript);
+          if (!text.endsWith(punctuated)) {
+            finalTranscript += punctuated + " ";
+          }
         } else {
-          interim += transcript;
+          // Only allow interim if not mobile
+          if (!isMobile()) {
+            interim += transcript;
+          }
         }
       }
 
       if (finalTranscript) {
         setText((prev) => (prev + " " + finalTranscript).trim());
       }
-      setInterimTranscript(interim);
+
+      setInterimTranscript(interim); // Will remain empty on mobile
     };
 
     recognition.onend = () => setIsListening(false);
@@ -186,8 +199,9 @@ const CreateNewTimeCapsule = () => {
             ) : (
               <Button
                 htmlType="button"
+                danger
                 type="primary"
-                icon={<CloseOutlined />}
+                icon={<PauseCircleFilled />}
                 onClick={stopListening}
                 className="px-4 py-2 rounded bg-red-500 text-white text-sm"
               >
