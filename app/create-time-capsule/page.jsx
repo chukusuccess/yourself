@@ -13,6 +13,8 @@ import dayjs from "dayjs";
 
 const { TextArea } = Input;
 
+let lastFinalTranscript = ""; // outside the function (global within the component)
+
 const CreateNewTimeCapsule = () => {
   const router = useRouter();
   const [form] = Form.useForm();
@@ -44,7 +46,7 @@ const CreateNewTimeCapsule = () => {
     recognition.interimResults = true;
     recognition.continuous = true;
 
-    let lastFinalTranscript = "";
+    // let lastFinalTranscript = "";
 
     // recognition.onresult = (event) => {
     //   let interim = "";
@@ -72,37 +74,64 @@ const CreateNewTimeCapsule = () => {
     //   setInterimTranscript(interim);
     // };
 
+    // recognition.onresult = (event) => {
+    //   let finalTranscript = "";
+    //   let interim = "";
+
+    //   console.log("👂 New result event:", event.results);
+    //   alert(`Event results before loop: ${event.results}`);
+
+    //   for (let i = event.resultIndex; i < event.results.length; i++) {
+    //     const result = event.results[i];
+    //     const transcript = result[0].transcript.trim();
+    //     const isFinal = result.isFinal;
+
+    //     console.log(`Result ${i}:`, {
+    //       transcript,
+    //       isFinal,
+    //     });
+
+    //     alert(
+    //       `Transcript in the loop: ${transcript} | Final in the loop: ${isFinal}`
+    //     );
+
+    //     if (isFinal) {
+    //       finalTranscript += autoPunctuate(transcript) + " ";
+    //     } else {
+    //       if (!isMobile()) interim += transcript;
+    //     }
+    //   }
+
+    //   if (finalTranscript.trim()) {
+    //     console.log("✅ Final transcript:", finalTranscript);
+    //     alert(`Final transcript after loop: ${finalTranscript}`);
+    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+    //   }
+
+    //   setInterimTranscript(interim);
+    // };
+
     recognition.onresult = (event) => {
       let finalTranscript = "";
       let interim = "";
-
-      console.log("👂 New result event:", event.results);
-      alert(`Event results before loop: ${event.results}`);
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript.trim();
         const isFinal = result.isFinal;
 
-        console.log(`Result ${i}:`, {
-          transcript,
-          isFinal,
-        });
-
-        alert(
-          `Transcript in the loop: ${transcript} | Final in the loop: ${isFinal}`
-        );
-
         if (isFinal) {
-          finalTranscript += autoPunctuate(transcript) + " ";
+          // Only handle if it's truly new (not a duplicate extension)
+          if (!transcript.startsWith(lastFinalTranscript)) {
+            lastFinalTranscript = transcript;
+            finalTranscript += autoPunctuate(transcript) + " ";
+          }
         } else {
           if (!isMobile()) interim += transcript;
         }
       }
 
       if (finalTranscript.trim()) {
-        console.log("✅ Final transcript:", finalTranscript);
-        alert(`Final transcript after loop: ${finalTranscript}`);
         setText((prev) => (prev + " " + finalTranscript.trim()).trim());
       }
 
