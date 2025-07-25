@@ -21,6 +21,7 @@ const CreateNewTimeCapsule = () => {
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef(null);
+  const isRecognizing = useRef(false);
 
   const isMobile = () =>
     typeof navigator !== "undefined" &&
@@ -43,9 +44,11 @@ const CreateNewTimeCapsule = () => {
     recognition.interimResults = true;
     recognition.continuous = true;
 
+    let lastFinalTranscript = "";
+
     recognition.onresult = (event) => {
-      let finalTranscript = "";
       let interim = "";
+      let finalTranscript = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
@@ -58,16 +61,27 @@ const CreateNewTimeCapsule = () => {
         }
       }
 
-      if (finalTranscript.trim()) {
+      if (
+        finalTranscript.trim() &&
+        finalTranscript.trim() !== lastFinalTranscript.trim()
+      ) {
         setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+        lastFinalTranscript = finalTranscript.trim();
       }
 
       setInterimTranscript(interim);
     };
 
     recognition.onend = () => {
+      isRecognizing.current = false;
       setIsListening(false);
       setInterimTranscript("");
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      isRecognizing.current = false;
+      setIsListening(false);
     };
 
     recognitionRef.current = recognition;
@@ -75,11 +89,14 @@ const CreateNewTimeCapsule = () => {
 
   const startListening = () => {
     if (!recognitionRef.current) initSpeechRecognition();
+    if (isRecognizing.current) return;
+
     try {
       recognitionRef.current?.start();
+      isRecognizing.current = true;
       setIsListening(true);
     } catch (e) {
-      console.warn("Recognition already started");
+      console.warn("Recognition already started:", e);
     }
   };
 
@@ -87,8 +104,9 @@ const CreateNewTimeCapsule = () => {
     try {
       recognitionRef.current?.stop();
     } catch (e) {
-      console.warn("Recognition already stopped");
+      console.warn("Recognition already stopped:", e);
     }
+    isRecognizing.current = false;
     setIsListening(false);
     setInterimTranscript("");
   };
