@@ -111,6 +111,35 @@ const CreateNewTimeCapsule = () => {
     //   setInterimTranscript(interim);
     // };
 
+    // recognition.onresult = (event) => {
+    //   let finalTranscript = "";
+    //   let interim = "";
+
+    //   for (let i = event.resultIndex; i < event.results.length; i++) {
+    //     const result = event.results[i];
+    //     const transcript = result[0].transcript.trim();
+    //     const isFinal = result.isFinal;
+
+    //     if (isFinal) {
+    //       // Only handle if it's truly new (not a duplicate extension)
+    //       if (!transcript.startsWith(lastFinalTranscript)) {
+    //         lastFinalTranscript = transcript;
+    //         finalTranscript += autoPunctuate(transcript) + " ";
+    //       }
+    //     } else {
+    //       if (!isMobile()) interim += transcript;
+    //     }
+    //   }
+
+    //   if (finalTranscript.trim()) {
+    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+    //   }
+
+    //   setInterimTranscript(interim);
+    // };
+
+    const lastHandledRef = useRef("");
+
     recognition.onresult = (event) => {
       let finalTranscript = "";
       let interim = "";
@@ -121,9 +150,8 @@ const CreateNewTimeCapsule = () => {
         const isFinal = result.isFinal;
 
         if (isFinal) {
-          // Only handle if it's truly new (not a duplicate extension)
-          if (!transcript.startsWith(lastFinalTranscript)) {
-            lastFinalTranscript = transcript;
+          if (transcript !== lastHandledRef.current) {
+            lastHandledRef.current = transcript;
             finalTranscript += autoPunctuate(transcript) + " ";
           }
         } else {
