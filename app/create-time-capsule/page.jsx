@@ -13,8 +13,6 @@ import dayjs from "dayjs";
 
 const { TextArea } = Input;
 
-let lastFinalTranscript = ""; // outside the function (global within the component)
-
 const CreateNewTimeCapsule = () => {
   const router = useRouter();
   const [form] = Form.useForm();
@@ -24,7 +22,10 @@ const CreateNewTimeCapsule = () => {
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef(null);
   const isRecognizing = useRef(false);
-  const lastHandledRef = useRef("");
+
+  // Track the cumulative final transcript to avoid duplicates
+  const finalTranscriptRef = useRef("");
+  const lastResultIndexRef = useRef(0);
 
   const isMobile = () =>
     typeof navigator !== "undefined" &&
@@ -47,134 +48,64 @@ const CreateNewTimeCapsule = () => {
     recognition.interimResults = true;
     recognition.continuous = true;
 
-    // let lastFinalTranscript = "";
-
-    // recognition.onresult = (event) => {
-    //   let interim = "";
-    //   let finalTranscript = "";
-
-    //   for (let i = event.resultIndex; i < event.results.length; i++) {
-    //     const result = event.results[i];
-    //     const transcript = result[0].transcript.trim();
-
-    //     if (result.isFinal) {
-    //       finalTranscript += autoPunctuate(transcript) + " ";
-    //     } else {
-    //       if (!isMobile()) interim += transcript;
-    //     }
-    //   }
-
-    //   if (
-    //     finalTranscript.trim() &&
-    //     finalTranscript.trim() !== lastFinalTranscript.trim()
-    //   ) {
-    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
-    //     lastFinalTranscript = finalTranscript.trim();
-    //   }
-
-    //   setInterimTranscript(interim);
-    // };
-
-    // recognition.onresult = (event) => {
-    //   let finalTranscript = "";
-    //   let interim = "";
-
-    //   console.log("👂 New result event:", event.results);
-    //   alert(`Event results before loop: ${event.results}`);
-
-    //   for (let i = event.resultIndex; i < event.results.length; i++) {
-    //     const result = event.results[i];
-    //     const transcript = result[0].transcript.trim();
-    //     const isFinal = result.isFinal;
-
-    //     console.log(`Result ${i}:`, {
-    //       transcript,
-    //       isFinal,
-    //     });
-
-    //     alert(
-    //       `Transcript in the loop: ${transcript} | Final in the loop: ${isFinal}`
-    //     );
-
-    //     if (isFinal) {
-    //       finalTranscript += autoPunctuate(transcript) + " ";
-    //     } else {
-    //       if (!isMobile()) interim += transcript;
-    //     }
-    //   }
-
-    //   if (finalTranscript.trim()) {
-    //     console.log("✅ Final transcript:", finalTranscript);
-    //     alert(`Final transcript after loop: ${finalTranscript}`);
-    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
-    //   }
-
-    //   setInterimTranscript(interim);
-    // };
-
-    // recognition.onresult = (event) => {
-    //   let finalTranscript = "";
-    //   let interim = "";
-
-    //   for (let i = event.resultIndex; i < event.results.length; i++) {
-    //     const result = event.results[i];
-    //     const transcript = result[0].transcript.trim();
-    //     const isFinal = result.isFinal;
-
-    //     if (isFinal) {
-    //       // Only handle if it's truly new (not a duplicate extension)
-    //       if (!transcript.startsWith(lastFinalTranscript)) {
-    //         lastFinalTranscript = transcript;
-    //         finalTranscript += autoPunctuate(transcript) + " ";
-    //       }
-    //     } else {
-    //       if (!isMobile()) interim += transcript;
-    //     }
-    //   }
-
-    //   if (finalTranscript.trim()) {
-    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
-    //   }
-
-    //   setInterimTranscript(interim);
-    // };
-
     recognition.onresult = (event) => {
       let finalTranscript = "";
       let interim = "";
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
+      // Process only new results starting from the last processed index
+      for (let i = lastResultIndexRef.current; i < event.results.length; i++) {
         const result = event.results[i];
-        const transcript = result[0].transcript.trim();
-        const isFinal = result.isFinal;
+        const transcript = result[0].transcript;
 
-        if (isFinal) {
-          if (transcript !== lastHandledRef.current) {
-            lastHandledRef.current = transcript;
-            finalTranscript += autoPunctuate(transcript) + " ";
-          }
+        if (result.isFinal) {
+          // Only add new final results
+          finalTranscript += transcript + " ";
+          lastResultIndexRef.current = i + 1;
         } else {
-          if (!isMobile()) interim += transcript;
+          // For interim results, only show on desktop
+          if (!isMobile()) {
+            interim += transcript;
+          }
         }
       }
 
+      // Update the cumulative final transcript
       if (finalTranscript.trim()) {
-        setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+        finalTranscriptRef.current += finalTranscript;
+        const processedText = autoPunctuate(finalTranscriptRef.current.trim());
+        setText(processedText);
       }
 
       setInterimTranscript(interim);
+    };
+
+    recognition.onstart = () => {
+      // Reset tracking variables when starting
+      finalTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
+      isRecognizing.current = true;
+      setIsListening(true);
     };
 
     recognition.onend = () => {
       isRecognizing.current = false;
       setIsListening(false);
       setInterimTranscript("");
+
+      // Reset tracking variables
+      finalTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
     };
 
     recognition.onerror = (event) => {
       console.error("Speech recognition error:", event.error);
       isRecognizing.current = false;
       setIsListening(false);
+      setInterimTranscript("");
+
+      // Reset tracking variables
+      finalTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
     };
 
     recognitionRef.current = recognition;
@@ -185,9 +116,11 @@ const CreateNewTimeCapsule = () => {
     if (isRecognizing.current) return;
 
     try {
+      // Reset tracking variables before starting
+      finalTranscriptRef.current = "";
+      lastResultIndexRef.current = 0;
+
       recognitionRef.current?.start();
-      isRecognizing.current = true;
-      setIsListening(true);
     } catch (e) {
       console.warn("Recognition already started:", e);
     }
@@ -208,6 +141,8 @@ const CreateNewTimeCapsule = () => {
     stopListening();
     setText("");
     setInterimTranscript("");
+    finalTranscriptRef.current = "";
+    lastResultIndexRef.current = 0;
   };
 
   const handleFinish = (values) => {
@@ -371,19 +306,6 @@ const CreateNewTimeCapsule = () => {
           </Button>
         </Form.Item>
       </Form>
-
-      {/* remove this debuging ui div */}
-      <div className="mt-10 p-4 bg-gray-100 rounded text-sm text-gray-800">
-        <p>
-          <strong>Debug Logs</strong>
-        </p>
-        <p>
-          <strong>Text:</strong> {text}
-        </p>
-        <p>
-          <strong>Interim:</strong> {interimTranscript}
-        </p>
-      </div>
 
       <div className="text-2xl font-bold mt-8 text-center text-gray-700">
         <span className="opacity-50">From</span>{" "}
