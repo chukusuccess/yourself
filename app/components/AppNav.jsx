@@ -11,14 +11,15 @@ const AppNavbar = () => {
 
   const navLinks = [
     { label: "Home", path: "/" },
-    { label: "Create Time Capsule", path: "/create-time-capsule" },
-    { label: "See Time Capsules", path: "/time-capsule" },
+    { label: "Milestones", path: "/milestones" },
+    { label: "Time Capsules", path: "/time-capsule" },
     { label: "Weekly Check-In", path: "/weekly-check-in" },
     { label: "Subscribe", path: "/offer" },
+    { label: "Profile", path: "/profile" },
   ];
 
   return (
-    <header className="w-full fixed top-0 z-50 px-6 py-3 shadow-lg bg-white flex items-center justify-between">
+    <header className="w-full fixed top-0 z-50 px-6 py-3 subtle-shadow bg-white flex items-center justify-between">
       <Link href="/" className="text-xl font-bold text-gray-800">
         Yourself.
       </Link>

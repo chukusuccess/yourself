@@ -1,69 +1,82 @@
-"use client";
-import React from "react";
-import { useRouter } from "next/navigation";
+import { ClockCircleFilled } from "@ant-design/icons";
+import { Card, Typography, Badge, Rate } from "antd";
 import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
-import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import React from "react";
 
-dayjs.extend(duration);
+const { Title, Paragraph, Text } = Typography;
 
 const TimeCapsuleCard = ({ capsule }) => {
-  const router = useRouter();
+  const d = dayjs(capsule.unlockDate);
   const now = dayjs();
-  const unlockDate = dayjs(capsule.unlockDate);
-  const isUnlocked = now.isAfter(unlockDate);
 
-  const handleClick = () => {
-    if (isUnlocked) {
-      router.push(`/view-time-capsule/${capsule.id}`);
-    }
-  };
+  const month = d.format("MMM"); // "Jul"
+  const day = d.format("D"); // "20"
+  const year = d.format("YYYY"); // "2020"
 
-  const timeLeft = dayjs.duration(unlockDate.diff(now));
-  const countdown = isUnlocked
-    ? "Unlocked"
-    : `${timeLeft.days()}d ${timeLeft.hours()}h ${timeLeft.minutes()}m`;
+  const isFuture = d.isAfter(now, "day");
+  const ribbonText = isFuture ? (
+    <ClockCircleFilled className="text-cyan-500" />
+  ) : (
+    "seen"
+  );
+  const ribbonColor = isFuture ? "#d0d0d0" : "cyan";
 
   return (
-    <div
-      onClick={handleClick}
-      className={`rounded-xl p-4 cursor-pointer transition-transform hover:scale-[1.0125] ${
-        isUnlocked
-          ? "bg-white hover:bg-blue-50"
-          : "bg-white blur-[3px] pointer-events-none"
-      }`}
-    >
-      <div className="flex justify-between items-center mb-1 z-50">
-        <h3 className="text-base font-semibold text-gray-800 truncate">
-          {capsule.title || "Untitled Message"}
-        </h3>
-        <span
-          className={`text-xs font-medium px-2 py-0.5 rounded ${
-            isUnlocked
-              ? "bg-green-100 text-green-600"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {isUnlocked ? "Open" : "Locked"}
-        </span>
-      </div>
+    <Badge.Ribbon text={ribbonText} color={ribbonColor} placement="start">
+      <Card
+        hoverable
+        // onClick={onClick}
+        bodyStyle={{ padding: 16 }}
+        style={{ width: "100%" }}
+        className="subtle-shadow"
+      >
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          {/* Left Section (80%) */}
+          <div
+            style={{
+              flex: 5,
+              paddingRight: 16,
+              borderRight: "1px solid #d2d2d2",
+            }}
+          >
+            <Title
+              level={5}
+              style={{ margin: "0 0 0 1.75rem", fontSize: "small" }}
+            >
+              {capsule.title || "Untitled Message"}
+            </Title>
+            <Paragraph
+              ellipsis={{ rows: 2 }}
+              style={{ marginBottom: 0, color: "#a2a2a2", fontSize: "smaller" }}
+            >
+              {/* From {capsule.from} to {capsule.to} */}
+              {capsule.messageText}
+            </Paragraph>
+          </div>
 
-      <p className="text-xs text-gray-400 mb-1 italic">
-        From {capsule.from} to {capsule.to}
-      </p>
-
-      <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
-        <span className="flex items-center gap-1">
-          <CalendarOutlined />
-          {unlockDate.format("MMM D, YYYY")}
-        </span>
-
-        <span className="flex items-center gap-1">
-          <ClockCircleOutlined />
-          {countdown}
-        </span>
-      </div>
-    </div>
+          {/* Right Section (20%) - Date vertically */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              justifyContent: "center",
+            }}
+          >
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {month}
+            </Text>
+            <Text strong style={{ fontSize: 24, lineHeight: 1 }}>
+              {day}
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              {year}
+            </Text>
+          </div>
+        </div>
+      </Card>
+    </Badge.Ribbon>
   );
 };
 
