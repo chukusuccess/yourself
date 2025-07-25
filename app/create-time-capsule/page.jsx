@@ -24,6 +24,7 @@ const CreateNewTimeCapsule = () => {
   const [interimTranscript, setInterimTranscript] = useState("");
   const recognitionRef = useRef(null);
   const isRecognizing = useRef(false);
+  const lastHandledRef = useRef("");
 
   const isMobile = () =>
     typeof navigator !== "undefined" &&
@@ -137,8 +138,6 @@ const CreateNewTimeCapsule = () => {
 
     //   setInterimTranscript(interim);
     // };
-
-    const lastHandledRef = useRef("");
 
     recognition.onresult = (event) => {
       let finalTranscript = "";
