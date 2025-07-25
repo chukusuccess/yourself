@@ -23,9 +23,6 @@ const CreateNewTimeCapsule = () => {
   const recognitionRef = useRef(null);
   const isRecognizing = useRef(false);
 
-  // Track the cumulative final transcript to avoid duplicates
-  const finalTranscriptRef = useRef("");
-
   const isMobile = () =>
     typeof navigator !== "undefined" &&
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -44,65 +41,47 @@ const CreateNewTimeCapsule = () => {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
-    recognition.interimResults = true;
-    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    let lastFinalTranscript = "";
 
     recognition.onresult = (event) => {
-      let newFinalTranscript = "";
       let interim = "";
+      let finalTranscript = "";
 
-      // Build the complete final transcript from all final results
-      for (let i = 0; i < event.results.length; i++) {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        const transcript = result[0].transcript;
+        const transcript = result[0].transcript.trim();
 
         if (result.isFinal) {
-          newFinalTranscript += transcript + " ";
+          finalTranscript += autoPunctuate(transcript) + " ";
         } else {
-          // For interim results, only show on desktop
-          if (!isMobile()) {
-            interim += transcript;
-          }
+          if (!isMobile()) interim += transcript;
         }
       }
 
-      // Only update if we have new final content
       if (
-        newFinalTranscript.trim() &&
-        newFinalTranscript.trim() !== finalTranscriptRef.current.trim()
+        finalTranscript.trim() &&
+        finalTranscript.trim() !== lastFinalTranscript.trim()
       ) {
-        finalTranscriptRef.current = newFinalTranscript.trim();
-        const processedText = autoPunctuate(finalTranscriptRef.current);
-        setText(processedText);
+        setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+        lastFinalTranscript = finalTranscript.trim();
       }
 
       setInterimTranscript(interim);
-    };
-
-    recognition.onstart = () => {
-      // Reset tracking variables when starting
-      finalTranscriptRef.current = "";
-      isRecognizing.current = true;
-      setIsListening(true);
     };
 
     recognition.onend = () => {
       isRecognizing.current = false;
       setIsListening(false);
       setInterimTranscript("");
-
-      // Reset tracking variables
-      finalTranscriptRef.current = "";
     };
 
     recognition.onerror = (event) => {
       console.error("Speech recognition error:", event.error);
       isRecognizing.current = false;
       setIsListening(false);
-      setInterimTranscript("");
-
-      // Reset tracking variables
-      finalTranscriptRef.current = "";
     };
 
     recognitionRef.current = recognition;
@@ -113,10 +92,9 @@ const CreateNewTimeCapsule = () => {
     if (isRecognizing.current) return;
 
     try {
-      // Reset tracking variables before starting
-      finalTranscriptRef.current = "";
-
       recognitionRef.current?.start();
+      isRecognizing.current = true;
+      setIsListening(true);
     } catch (e) {
       console.warn("Recognition already started:", e);
     }
@@ -137,7 +115,6 @@ const CreateNewTimeCapsule = () => {
     stopListening();
     setText("");
     setInterimTranscript("");
-    finalTranscriptRef.current = "";
   };
 
   const handleFinish = (values) => {
