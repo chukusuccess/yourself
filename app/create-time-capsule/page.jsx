@@ -25,7 +25,6 @@ const CreateNewTimeCapsule = () => {
 
   // Track the cumulative final transcript to avoid duplicates
   const finalTranscriptRef = useRef("");
-  const lastResultIndexRef = useRef(0);
 
   const isMobile = () =>
     typeof navigator !== "undefined" &&
@@ -49,18 +48,16 @@ const CreateNewTimeCapsule = () => {
     recognition.continuous = true;
 
     recognition.onresult = (event) => {
-      let finalTranscript = "";
+      let newFinalTranscript = "";
       let interim = "";
 
-      // Process only new results starting from the last processed index
-      for (let i = lastResultIndexRef.current; i < event.results.length; i++) {
+      // Build the complete final transcript from all final results
+      for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript;
 
         if (result.isFinal) {
-          // Only add new final results
-          finalTranscript += transcript + " ";
-          lastResultIndexRef.current = i + 1;
+          newFinalTranscript += transcript + " ";
         } else {
           // For interim results, only show on desktop
           if (!isMobile()) {
@@ -69,10 +66,13 @@ const CreateNewTimeCapsule = () => {
         }
       }
 
-      // Update the cumulative final transcript
-      if (finalTranscript.trim()) {
-        finalTranscriptRef.current += finalTranscript;
-        const processedText = autoPunctuate(finalTranscriptRef.current.trim());
+      // Only update if we have new final content
+      if (
+        newFinalTranscript.trim() &&
+        newFinalTranscript.trim() !== finalTranscriptRef.current.trim()
+      ) {
+        finalTranscriptRef.current = newFinalTranscript.trim();
+        const processedText = autoPunctuate(finalTranscriptRef.current);
         setText(processedText);
       }
 
@@ -82,7 +82,6 @@ const CreateNewTimeCapsule = () => {
     recognition.onstart = () => {
       // Reset tracking variables when starting
       finalTranscriptRef.current = "";
-      lastResultIndexRef.current = 0;
       isRecognizing.current = true;
       setIsListening(true);
     };
@@ -94,7 +93,6 @@ const CreateNewTimeCapsule = () => {
 
       // Reset tracking variables
       finalTranscriptRef.current = "";
-      lastResultIndexRef.current = 0;
     };
 
     recognition.onerror = (event) => {
@@ -105,7 +103,6 @@ const CreateNewTimeCapsule = () => {
 
       // Reset tracking variables
       finalTranscriptRef.current = "";
-      lastResultIndexRef.current = 0;
     };
 
     recognitionRef.current = recognition;
@@ -118,7 +115,6 @@ const CreateNewTimeCapsule = () => {
     try {
       // Reset tracking variables before starting
       finalTranscriptRef.current = "";
-      lastResultIndexRef.current = 0;
 
       recognitionRef.current?.start();
     } catch (e) {
@@ -142,7 +138,6 @@ const CreateNewTimeCapsule = () => {
     setText("");
     setInterimTranscript("");
     finalTranscriptRef.current = "";
-    lastResultIndexRef.current = 0;
   };
 
   const handleFinish = (values) => {
