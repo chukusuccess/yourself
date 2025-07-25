@@ -26,6 +26,12 @@ const CreateNewTimeCapsule = () => {
     typeof navigator !== "undefined" &&
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+  const autoPunctuate = (input) => {
+    let result = input.trim();
+    if (!/[.?!]$/.test(result)) result += ".";
+    return result.charAt(0).toUpperCase() + result.slice(1);
+  };
+
   const initSpeechRecognition = () => {
     const SpeechRecognition =
       typeof window !== "undefined" &&
@@ -37,54 +43,52 @@ const CreateNewTimeCapsule = () => {
     recognition.interimResults = true;
     recognition.continuous = true;
 
-    let lastFinal = ""; // Track last spoken sentence
-
     recognition.onresult = (event) => {
       let finalTranscript = "";
       let interim = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript.trim();
+        const result = event.results[i];
+        const transcript = result[0].transcript.trim();
 
-        if (event.results[i].isFinal) {
-          const punctuated = autoPunctuate(transcript);
-          if (!text.endsWith(punctuated)) {
-            finalTranscript += punctuated + " ";
-          }
+        if (result.isFinal) {
+          finalTranscript += autoPunctuate(transcript) + " ";
         } else {
-          // Only allow interim if not mobile
-          if (!isMobile()) {
-            interim += transcript;
-          }
+          if (!isMobile()) interim += transcript;
         }
       }
 
-      if (finalTranscript) {
-        setText((prev) => (prev + " " + finalTranscript).trim());
+      if (finalTranscript.trim()) {
+        setText((prev) => (prev + " " + finalTranscript.trim()).trim());
       }
 
-      setInterimTranscript(interim); // Will remain empty on mobile
+      setInterimTranscript(interim);
     };
 
-    recognition.onend = () => setIsListening(false);
-    recognitionRef.current = recognition;
-  };
+    recognition.onend = () => {
+      setIsListening(false);
+      setInterimTranscript("");
+    };
 
-  const autoPunctuate = (input) => {
-    // Very naive auto-punctuation
-    let result = input.trim();
-    if (!/[.?!]$/.test(result)) result += ".";
-    return result.charAt(0).toUpperCase() + result.slice(1);
+    recognitionRef.current = recognition;
   };
 
   const startListening = () => {
     if (!recognitionRef.current) initSpeechRecognition();
-    recognitionRef.current.start();
-    setIsListening(true);
+    try {
+      recognitionRef.current?.start();
+      setIsListening(true);
+    } catch (e) {
+      console.warn("Recognition already started");
+    }
   };
 
   const stopListening = () => {
-    recognitionRef.current?.stop();
+    try {
+      recognitionRef.current?.stop();
+    } catch (e) {
+      console.warn("Recognition already stopped");
+    }
     setIsListening(false);
     setInterimTranscript("");
   };
@@ -97,25 +101,11 @@ const CreateNewTimeCapsule = () => {
 
   const handleFinish = (values) => {
     setLoading(true);
-    // Simulate saving to backend
     setTimeout(() => {
       setLoading(false);
       message.success("Time capsule saved!");
       router.push("/time-capsules");
     }, 1000);
-  };
-
-  const toggleListening = () => {
-    const recognition = recognitionRef.current;
-    if (!recognition) return;
-
-    if (!isListening) {
-      recognition.start();
-      setIsListening(true);
-    } else {
-      recognition.stop();
-      setIsListening(false);
-    }
   };
 
   return (
@@ -236,7 +226,7 @@ const CreateNewTimeCapsule = () => {
         <Form.Item label="Add an image (optional)" name="image">
           <Upload.Dragger
             accept="image/*"
-            beforeUpload={() => false} // prevent automatic upload
+            beforeUpload={() => false}
             maxCount={1}
           >
             <p className="ant-upload-drag-icon">
@@ -263,8 +253,6 @@ const CreateNewTimeCapsule = () => {
             </Button>
           </Upload>
         </Form.Item>
-
-        {/* Future: Audio-to-text conversion area can be added here */}
 
         <Form.Item>
           <Button type="primary" htmlType="submit" block loading={loading}>
