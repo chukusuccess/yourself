@@ -46,27 +46,64 @@ const CreateNewTimeCapsule = () => {
 
     let lastFinalTranscript = "";
 
+    // recognition.onresult = (event) => {
+    //   let interim = "";
+    //   let finalTranscript = "";
+
+    //   for (let i = event.resultIndex; i < event.results.length; i++) {
+    //     const result = event.results[i];
+    //     const transcript = result[0].transcript.trim();
+
+    //     if (result.isFinal) {
+    //       finalTranscript += autoPunctuate(transcript) + " ";
+    //     } else {
+    //       if (!isMobile()) interim += transcript;
+    //     }
+    //   }
+
+    //   if (
+    //     finalTranscript.trim() &&
+    //     finalTranscript.trim() !== lastFinalTranscript.trim()
+    //   ) {
+    //     setText((prev) => (prev + " " + finalTranscript.trim()).trim());
+    //     lastFinalTranscript = finalTranscript.trim();
+    //   }
+
+    //   setInterimTranscript(interim);
+    // };
+
     recognition.onresult = (event) => {
-      let interim = "";
       let finalTranscript = "";
+      let interim = "";
+
+      console.log("👂 New result event:", event.results);
+      alert(`Event results before loop: ${event.results}`);
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript.trim();
+        const isFinal = result.isFinal;
 
-        if (result.isFinal) {
+        console.log(`Result ${i}:`, {
+          transcript,
+          isFinal,
+        });
+
+        alert(
+          `Transcript in the loop: ${transcript} | Final in the loop: ${isFinal}`
+        );
+
+        if (isFinal) {
           finalTranscript += autoPunctuate(transcript) + " ";
         } else {
           if (!isMobile()) interim += transcript;
         }
       }
 
-      if (
-        finalTranscript.trim() &&
-        finalTranscript.trim() !== lastFinalTranscript.trim()
-      ) {
+      if (finalTranscript.trim()) {
+        console.log("✅ Final transcript:", finalTranscript);
+        alert(`Final transcript after loop: ${finalTranscript}`);
         setText((prev) => (prev + " " + finalTranscript.trim()).trim());
-        lastFinalTranscript = finalTranscript.trim();
       }
 
       setInterimTranscript(interim);
@@ -278,6 +315,19 @@ const CreateNewTimeCapsule = () => {
           </Button>
         </Form.Item>
       </Form>
+
+      {/* remove this debuging ui div */}
+      <div className="mt-10 p-4 bg-gray-100 rounded text-sm text-gray-800">
+        <p>
+          <strong>Debug Logs</strong>
+        </p>
+        <p>
+          <strong>Text:</strong> {text}
+        </p>
+        <p>
+          <strong>Interim:</strong> {interimTranscript}
+        </p>
+      </div>
 
       <div className="text-2xl font-bold mt-8 text-center text-gray-700">
         <span className="opacity-50">From</span>{" "}
