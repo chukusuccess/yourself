@@ -88,11 +88,18 @@ const Profile = () => {
         <h2 className="text-xl font-semibold mt-3">{userName}</h2>
       </div>
 
+      <div className="bg-gradient-to-br from-[#191970] to bg-[#f1a61a] p-4 rounded-xl shadow-sm text-white flex items-center w-full mb-8">
+        <span className="flex-3">Get Yourself Premium now</span>
+        <span className="flex-1 flex text-3xl font-bold items-center justify-center">
+          £2.99
+        </span>
+      </div>
+
       <div className="flex flex-col gap-4">
         {profileItems.map(({ key, icon, label, render }) => (
           <div
             key={key}
-            className={`flex items-center justify-between px-1 ${
+            className={`flex items-center justify-between mb-4 ${
               key !== "theme" ? "cursor-pointer" : ""
             }`}
             onClick={() => {
@@ -100,7 +107,9 @@ const Profile = () => {
             }}
           >
             <div className="flex items-center gap-3 text-base">
-              {icon}
+              <div className="bg-white p-2 flex items-center justify-center invert rounded-full text-xl">
+                {icon}
+              </div>
               <span>{label}</span>
             </div>
             {render}

@@ -40,15 +40,30 @@ const AppNavbar = () => {
         />
       </div>
 
-      <Drawer placement="right" onClose={toggleDrawer} open={open} title="">
-        <ul className="flex flex-col decoration-0 list-none">
+      <Drawer
+        closeIcon={null}
+        placement="right"
+        onClose={toggleDrawer}
+        open={open}
+        title="Yourself."
+        extra={
+          <Button
+            type="primary"
+            htmlType="button"
+            icon={<CloseOutlined />}
+            onClick={toggleDrawer}
+            className="w-fit"
+          />
+        }
+      >
+        <ul className="flex flex-col decoration-0 list-none items-center w-full">
           {navLinks.map((link) => (
-            <li className="decoration-0 list-none" key={link.path}>
+            <li className="decoration-0 list-none w-full" key={link.path}>
               <Link
                 style={{ color: "#1e2939" }}
                 href={link.path}
                 onClick={() => setOpen(false)}
-                className="block"
+                className="flex w-full items-center justify-center"
               >
                 {link.label}
               </Link>
