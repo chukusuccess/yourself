@@ -124,6 +124,14 @@ export default function Home() {
     // Calculate seasons experienced
     const seasons = Math.floor(daysLived / 91.25);
 
+    // --- New meaningful stats ---
+    const hoursAlive = daysLived * 24;
+    const monthsLived = Math.floor(daysLived / 30.44);
+    const sunrisesSeen = Math.floor(daysLived * 0.7); // assuming ~30% missed while sleeping or indoors
+    const laughs = Math.floor(daysLived * 17); // average person laughs 17 times a day
+    const cries = Math.floor(daysLived * 0.5); // not every day
+    const hugs = Math.floor(daysLived * 2); // variable, moderate guess
+
     return {
       weeksLived,
       totalWeeks,
@@ -135,6 +143,14 @@ export default function Home() {
       breaths,
       seasons,
       birthYear,
+
+      // New additions
+      hoursAlive,
+      monthsLived,
+      sunrisesSeen,
+      laughs,
+      cries,
+      hugs,
     };
   };
 

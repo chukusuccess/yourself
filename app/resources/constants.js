@@ -60,5 +60,28 @@ export const TRANSLATIONS = {
     "naturalSequoiaEnd": "of its potential lifespan.",
     "naturalCells":
       "During your lifetime, your body has replaced most of its cells several times. You are not made of the same atoms you were born with.",
+    "lifeHighlightsHours": "That's approximately",
+
+    // ////////////////////////////////////////////////////////////////////////////////////////
+    // PREMIUM FROM HERE MAYBE
+    // ////////////////////////////////////////////////////////////////////////////////////////
+
+    "lifeHighlightsHoursEnd": "hours you've been alive.",
+    "lifeHighlightsMonthsEnd": "months of your life so far.",
+    "lifeHighlightsSunrises": "You've witnessed around",
+    "lifeHighlightsSunrisesEnd": "sunrises (if you were awake).",
+    "lifeHighlightsBlanks":
+      "You’ve forgotten more days than you remember. Memory is selective, time is not.",
+    "emotionalMomentsTitle": "Moments & emotions",
+    "emotionalLaughter": "You've likely laughed",
+    "emotionalLaughterEnd": "times.",
+    "emotionalCried": "And cried around",
+    "emotionalCriedEnd": "times.",
+    "emotionalHugs": "You've given or received about",
+    "emotionalHugsEnd": "hugs.",
+    "reflectionTitle": "Reflections",
+    "reflectionMemory": "How many of those days do you truly remember?",
+    "reflectionChoices": "How many were lived intentionally?",
+    "reflectionGrowth": "And how many changed you forever?",
   },
 };

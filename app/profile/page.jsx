@@ -41,7 +41,7 @@ const Profile = () => {
     {
       key: "family",
       icon: <TeamOutlined />,
-      label: "Family Profile",
+      label: "Family & Friends",
     },
     {
       key: "privacy",
@@ -83,17 +83,17 @@ const Profile = () => {
 
   return (
     <div className="w-full p-6">
-      <div className="flex flex-col items-center mb-6">
+      {/* <div className="flex flex-col items-center mb-6">
         <Avatar size={80} icon={<UserOutlined />} />
         <h2 className="text-xl font-semibold mt-3">{userName}</h2>
-      </div>
+      </div> */}
 
-      <div className="bg-gradient-to-br from-[#191970] to bg-[#f1a61a] p-4 rounded-xl shadow-sm text-white flex items-center w-full mb-8">
+      {/* <div className="bg-gradient-to-br from-[#191970] to bg-[#f1a61a] p-4 rounded-xl shadow-sm text-white flex items-center w-full mb-8">
         <span className="flex-3">Get Yourself Premium now</span>
         <span className="flex-1 flex text-3xl font-bold items-center justify-center">
           £2.99
         </span>
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-4">
         {profileItems.map(({ key, icon, label, render }) => (

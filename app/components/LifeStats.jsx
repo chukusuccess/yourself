@@ -61,6 +61,14 @@ const LifeStats = ({
             </span>{" "}
             {t("lifeHighlightsBreathsEnd")}
           </p>
+          <p>
+            {t("lifeHighlightsSunrises")}{" "}
+            <span className="text-gray-900 font-medium">
+              {getFormattedNumber(stats.sunrisesSeen)}
+            </span>{" "}
+            {t("lifeHighlightsSunrisesEnd")}
+          </p>
+          <p className="italic">{t("lifeHighlightsBlanks")}</p>
         </div>
       </div>
 
@@ -111,7 +119,47 @@ const LifeStats = ({
         </div>
       </div>
 
-      <PremiumAdCard />
+      <div className="bg-white p-6 rounded-xl shadow-sm">
+        <h2 className="text-lg font-normal mb-4 text-gray-800">
+          {t("emotionalMomentsTitle")}
+        </h2>
+        <div className="space-y-4 text-xs text-gray-600">
+          <p>
+            {t("emotionalLaughter")}{" "}
+            <span className="text-gray-900 font-medium">
+              {getFormattedNumber(stats.laughs)}
+            </span>{" "}
+            {t("emotionalLaughterEnd")}
+          </p>
+          <p>
+            {t("emotionalCried")}{" "}
+            <span className="text-gray-900 font-medium">
+              {getFormattedNumber(stats.cries)}
+            </span>{" "}
+            {t("emotionalCriedEnd")}
+          </p>
+          <p>
+            {t("emotionalHugs")}{" "}
+            <span className="text-gray-900 font-medium">
+              {getFormattedNumber(stats.hugs)}
+            </span>{" "}
+            {t("emotionalHugsEnd")}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-xl shadow-sm">
+        <h2 className="text-lg font-normal mb-4 text-gray-800">
+          {t("reflectionTitle")}
+        </h2>
+        <div className="space-y-2 text-xs text-gray-600 italic">
+          <p>{t("reflectionMemory")}</p>
+          <p>{t("reflectionChoices")}</p>
+          <p>{t("reflectionGrowth")}</p>
+        </div>
+      </div>
+
+      {/* <PremiumAdCard /> */}
     </div>
   );
 };
