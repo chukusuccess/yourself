@@ -4,7 +4,7 @@ import Splash from "./components/Splash";
 import { motion } from "framer-motion";
 import { TRANSLATIONS } from "./resources/constants";
 import { findMatchingLocale } from "./resources/utils";
-import { Button, DatePicker, Divider, Tooltip } from "antd";
+import { Button, Col, DatePicker, Divider, Row, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { fadeIn, animationThree } from "./resources/animation";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,6 +14,7 @@ import Image from "next/image";
 
 import WeekGrid from "./components/WeekGrid";
 import LifeStats from "./components/LifeStats";
+import { ClockCircleFilled, FlagFilled } from "@ant-design/icons";
 
 dayjs.extend(customParseFormat);
 const customFormat = (value) => {
@@ -286,6 +287,59 @@ export default function Home() {
                 getAverageBirthsPerDay={getAverageBirthsPerDay}
                 getAverageDeathsPerDay={getAverageDeathsPerDay}
               />
+              <br />
+              <div className="flex flex-col items-center justify-center">
+                <Row gutter={[24, 24]}>
+                  <Col span={12}>
+                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                      Write a Time Capsule
+                      <Image
+                        src={"/clock.png"}
+                        alt="add"
+                        width={100}
+                        height={100}
+                        className="h-1/4 w-auto"
+                      />
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                      Mark a Milestone
+                      <Image
+                        src={"/achieve.png"}
+                        alt="add"
+                        width={100}
+                        height={100}
+                        className="h-1/4 w-auto"
+                      />
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                      Add a New Habit
+                      <Image
+                        src={"/book.png"}
+                        alt="add"
+                        width={100}
+                        height={100}
+                        className="h-1/4 w-auto"
+                      />
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                      Invite Family or Friends
+                      <Image
+                        src={"/family.png"}
+                        alt="add"
+                        width={100}
+                        height={100}
+                        className="h-1/4 w-auto"
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </div>
 
               <Button
                 size="large"

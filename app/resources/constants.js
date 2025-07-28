@@ -1,7 +1,6 @@
 export const TRANSLATIONS = {
   "en-US": {
-    "pageTitle":
-      "We’ll show you how far you’ve come… And how much time may be left.",
+    "pageTitle": "We’ll show you how far you’ve come.",
     "pageSubtitle": "Time is slipping by — quietly, invisibly.",
     "guestPageTitle": "There are 4,160 weeks in the average human life…",
     "guestPageSubtitle": "You’ve already lived ___ of them.",
