@@ -8,6 +8,7 @@ import { Button, Col, DatePicker, Divider, Row, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { fadeIn, animationThree } from "./resources/animation";
 import { useRouter, useSearchParams } from "next/navigation";
+import supabase from "./supabase";
 
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import Image from "next/image";
@@ -52,6 +53,18 @@ export default function Home() {
   const freemium = searchParams.get("user");
 
   const router = useRouter();
+
+  const handleRoute = async (route) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/auth");
+    } else {
+      router.push(route);
+    }
+  };
 
   const text = t("pageSubtitle");
   const text2 = t("guestPageSubtitle");
@@ -189,9 +202,22 @@ export default function Home() {
     return 166000;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setStats(calculateStats(birthdate));
     setStep(2);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session) {
+      const userId = session.user.id;
+
+      await supabase
+        .from("profiles")
+        .upsert({ id: userId, birthdate: birthdate.toString() });
+    }
+
     router.push("/?user=guest");
   };
 
@@ -291,7 +317,10 @@ export default function Home() {
               <div className="flex flex-col items-center justify-center">
                 <Row gutter={[24, 24]}>
                   <Col span={12}>
-                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                    <div
+                      onClick={() => handleRoute("/create-time-capsule")}
+                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                    >
                       Write a Time Capsule
                       <Image
                         src={"/clock.png"}
@@ -303,7 +332,10 @@ export default function Home() {
                     </div>
                   </Col>
                   <Col span={12}>
-                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                    <div
+                      onClick={() => handleRoute("/create-milestone")}
+                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                    >
                       Mark a Milestone
                       <Image
                         src={"/achieve.png"}
@@ -315,7 +347,10 @@ export default function Home() {
                     </div>
                   </Col>
                   <Col span={12}>
-                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                    <div
+                      onClick={() => handleRoute("/create-habit")}
+                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                    >
                       Add a New Habit
                       <Image
                         src={"/book.png"}
@@ -327,7 +362,10 @@ export default function Home() {
                     </div>
                   </Col>
                   <Col span={12}>
-                    <div className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow">
+                    <div
+                      onClick={() => handleRoute("/invite-loved-one")}
+                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                    >
                       Invite Family or Friends
                       <Image
                         src={"/family.png"}

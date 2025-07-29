@@ -6,7 +6,7 @@ import React from "react";
 const { Title, Paragraph, Text } = Typography;
 
 const TimeCapsuleCard = ({ capsule }) => {
-  const d = dayjs(capsule.unlockDate);
+  const d = dayjs(capsule.unlock_date);
   const now = dayjs();
 
   const month = d.format("MMM"); // "Jul"
@@ -50,7 +50,7 @@ const TimeCapsuleCard = ({ capsule }) => {
               style={{ marginBottom: 0, color: "#a2a2a2", fontSize: "smaller" }}
             >
               {/* From {capsule.from} to {capsule.to} */}
-              {capsule.messageText}
+              {capsule.content}
             </Paragraph>
           </div>
 

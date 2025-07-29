@@ -11,11 +11,11 @@ const AppNavbar = () => {
 
   const navLinks = [
     { label: "Home", path: "/" },
-    { label: "Milestones", path: "/milestones" },
-    { label: "Time Capsules", path: "/time-capsule" },
-    { label: "Weekly Check-In", path: "/weekly-check-in" },
+    { label: "Milestones", path: "/home/milestones" },
+    { label: "Time Capsules", path: "/home/time-capsule" },
+    { label: "Weekly Check-In", path: "/home/weekly-check-in" },
     // { label: "Subscribe", path: "/offer" },
-    { label: "Profile", path: "/profile" },
+    { label: "Profile", path: "/home/profile" },
   ];
 
   return (

@@ -12,6 +12,7 @@
     "@ant-design/icons": "^5.3.7",
     "@ant-design/plots": "^2.3.1",
     "@ant-design/pro-layout": "^7.19.7",
+    "@supabase/supabase-js": "^2.53.0",
     "antd": "^5.17.3",
     "appwrite": "^13.0.2",
     "axios": "^1.7.2",
