@@ -28,7 +28,10 @@ const AuthPage = () => {
       result = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name } },
+        options: {
+          data: { full_name: name },
+          emailRedirectTo: "https://yourself-virid.vercel.app/auth",
+        },
       });
     } else {
       result = await supabase.auth.signInWithPassword({ email, password });
@@ -37,7 +40,6 @@ const AuthPage = () => {
     setLoading(false);
 
     if (result.error) {
-      // message.error(result.error.message, 2.5);
       messageApi.error(result.error.message, 3);
       console.log("supabase response from error:", result);
     } else {
@@ -45,7 +47,7 @@ const AuthPage = () => {
         isSignUp ? "Check your email to confirm!" : "Signed in successfully"
       );
       console.log("supabase response from success:", result);
-      router.replace("/");
+      !isSignUp ? router.replace("/") : router.replace("/auth");
     }
   };
 
@@ -55,7 +57,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 w-full">
+    <div className="h-[80vh] flex flex-col items-center justify-center bg-gray-100 px-4 w-full">
       {contextHolder}
       <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-md">
         <Title level={3} className="text-center mb-6">

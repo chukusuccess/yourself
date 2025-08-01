@@ -4,7 +4,17 @@ import Splash from "./components/Splash";
 import { motion } from "framer-motion";
 import { TRANSLATIONS } from "./resources/constants";
 import { findMatchingLocale } from "./resources/utils";
-import { Button, Col, DatePicker, Divider, Row, Tooltip } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Divider,
+  Input,
+  Modal,
+  Row,
+  message,
+} from "antd";
+import { CopyOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { fadeIn, animationThree } from "./resources/animation";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -48,20 +58,78 @@ export default function Home() {
   const [stats, setStats] = useState(null);
   const [displayedText, setDisplayedText] = useState("");
   const [currentPage, setCurrentPage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inviteLink, setInviteLink] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOk = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      messageApi.success("Link copied to clipboard!");
+      setIsModalOpen(false);
+    } catch (err) {
+      messageApi.error("Failed to copy.");
+    }
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const searchParams = useSearchParams();
   const freemium = searchParams.get("user");
 
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchRefCode = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) return;
+
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("ref_code")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching ref_code:", error);
+        messageApi.error("Could not load invite link.");
+      } else {
+        const url = `https://yourself-virid.vercel.app/home/friends?ref=${data.ref_code}`;
+        setInviteLink(url);
+      }
+
+      setLoading(false);
+    };
+
+    if (isModalOpen) {
+      fetchRefCode();
+    }
+  }, [isModalOpen]);
+
   const handleRoute = async (route) => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
+    if (session && route === "/home/invite-loved-one") {
+      showModal();
+    }
+
     if (!session) {
       router.push("/auth");
-    } else {
+    }
+
+    if (session && route !== "/home/invite-loved-one") {
       router.push(route);
     }
   };
@@ -206,17 +274,17 @@ export default function Home() {
     setStats(calculateStats(birthdate));
     setStep(2);
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // const {
+    //   data: { session },
+    // } = await supabase.auth.getSession();
 
-    if (session) {
-      const userId = session.user.id;
+    // if (session) {
+    //   const userId = session.user.id;
 
-      await supabase
-        .from("profiles")
-        .upsert({ id: userId, birthdate: birthdate.toString() });
-    }
+    //   await supabase
+    //     .from("profiles")
+    //     .upsert({ id: userId, birthdate: birthdate.toString() });
+    // }
 
     router.push("/?user=guest");
   };
@@ -237,6 +305,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-items-center min-h-screen max-w-screen sm:w-1/3">
       <Splash />
       <div className="min-h-screen pt-16 px-4">
+        {contextHolder}
         <div>
           <motion.div
             key={currentPage} // important to trigger animation when page changes
@@ -318,7 +387,7 @@ export default function Home() {
                 <Row gutter={[24, 24]}>
                   <Col span={12}>
                     <div
-                      onClick={() => handleRoute("/create-time-capsule")}
+                      onClick={() => handleRoute("/home/create-time-capsule")}
                       className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
                     >
                       Write a Time Capsule
@@ -333,7 +402,7 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <div
-                      onClick={() => handleRoute("/create-milestone")}
+                      onClick={() => handleRoute("/home/create-milestone")}
                       className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
                     >
                       Mark a Milestone
@@ -348,7 +417,7 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <div
-                      onClick={() => handleRoute("/create-habit")}
+                      onClick={() => handleRoute("/home/create-habit")}
                       className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
                     >
                       Add a New Habit
@@ -363,7 +432,7 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <div
-                      onClick={() => handleRoute("/invite-loved-one")}
+                      onClick={() => handleRoute("/home/invite-loved-one")}
                       className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
                     >
                       Invite Family or Friends
@@ -378,6 +447,24 @@ export default function Home() {
                   </Col>
                 </Row>
               </div>
+
+              <Modal
+                title="Share your invite link"
+                centered
+                open={isModalOpen}
+                onOk={handleOk}
+                okText="Copy"
+                onCancel={handleCancel}
+              >
+                <div className="space-y-2">
+                  <p>Send this link to someone you'd like to invite:</p>
+                  <Input
+                    value={inviteLink}
+                    addonAfter={<CopyOutlined />}
+                    readOnly
+                  />
+                </div>
+              </Modal>
 
               <Button
                 size="large"

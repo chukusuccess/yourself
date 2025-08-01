@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, Modal, Switch, Button, Typography, message } from "antd";
 import {
   UserOutlined,
@@ -19,13 +20,13 @@ import { useAuth } from "@/app/contexts/AuthProvider";
 
 const { Title } = Typography;
 
-const userName = "John Doe";
-
 const Profile = () => {
   const [theme, setTheme] = useState("light");
   const [modal, setModal] = useState("");
 
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
+
+  const router = useRouter();
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -86,18 +87,6 @@ const Profile = () => {
 
   return (
     <div className="w-full p-6">
-      {/* <div className="flex flex-col items-center mb-6">
-        <Avatar size={80} icon={<UserOutlined />} />
-        <h2 className="text-xl font-semibold mt-3">{userName}</h2>
-      </div> */}
-
-      {/* <div className="bg-gradient-to-br from-[#191970] to bg-[#f1a61a] p-4 rounded-xl shadow-sm text-white flex items-center w-full mb-8">
-        <span className="flex-3">Get Yourself Premium now</span>
-        <span className="flex-1 flex text-3xl font-bold items-center justify-center">
-          £2.99
-        </span>
-      </div> */}
-
       <div className="flex flex-col gap-4">
         {profileItems.map(({ key, icon, label, render }) => (
           <div
@@ -106,7 +95,8 @@ const Profile = () => {
               key !== "theme" ? "cursor-pointer" : ""
             }`}
             onClick={() => {
-              if (key !== "theme") openModal(key);
+              if (key !== "theme" && key !== "family") openModal(key);
+              if (key === "family") router.push("/home/friends");
             }}
           >
             <div className="flex items-center gap-3 text-base">
@@ -125,18 +115,17 @@ const Profile = () => {
       <Modal
         open={modal === "personal"}
         onCancel={closeModal}
-        title="Personal Info"
+        title=""
         footer={null}
+        centered
       >
-        <p className="mb-2 flex items-center gap-2">
-          <MailOutlined /> Email: johndoe@example.com
-        </p>
-        <p className="mb-2 flex items-center gap-2">
-          <PhoneOutlined /> Phone: +234 801 234 5678
-        </p>
-        <p className="mb-2 flex items-center gap-2">
-          <UserOutlined /> Profile image: (default avatar)
-        </p>
+        <div className="w-full flex flex-col items-center justify-center">
+          <div className="bg-gray-200 rounded-full w-20 h-20 flex items-center justify-center">
+            <UserOutlined className="text-4xl" />
+          </div>
+          <br />
+          <span className="w-full text-center">{currentUser?.email}</span>
+        </div>
       </Modal>
 
       <Modal
@@ -144,6 +133,7 @@ const Profile = () => {
         onCancel={closeModal}
         title="Family Profile"
         footer={null}
+        centered
       >
         <ul className="list-disc list-inside space-y-1">
           <li>Mom - Janet Doe</li>
@@ -157,6 +147,7 @@ const Profile = () => {
         onCancel={closeModal}
         title="Privacy Settings"
         footer={null}
+        centered
       >
         <Button type="primary">Download a copy of your data</Button>
       </Modal>
@@ -166,6 +157,7 @@ const Profile = () => {
         onCancel={closeModal}
         title="Saved Places"
         footer={null}
+        centered
       >
         <ul className="list-disc list-inside space-y-1">
           <li>Home - Lagos</li>
@@ -178,6 +170,7 @@ const Profile = () => {
         onCancel={closeModal}
         title="Select Language"
         footer={null}
+        centered
       >
         <ul className="space-y-2">
           <li>English (Selected)</li>
@@ -192,6 +185,7 @@ const Profile = () => {
         onCancel={closeModal}
         title="Connected Calendars"
         footer={<Button type="primary">Connect New Calendar</Button>}
+        centered
       >
         <ul className="space-y-1">
           <li>Google Calendar - Connected</li>
@@ -205,6 +199,7 @@ const Profile = () => {
         onOk={() => logout()}
         okText="Confirm"
         cancelText="Cancel"
+        centered
       >
         <p>Are you sure you want to log out?</p>
       </Modal>
@@ -217,6 +212,7 @@ const Profile = () => {
         okText="Yes, Delete"
         okButtonProps={{ danger: true }}
         cancelText="Cancel"
+        centered
       >
         <p>This action cannot be undone. Are you sure?</p>
       </Modal>

@@ -15,6 +15,7 @@ const AppNavbar = () => {
     { label: "Time Capsules", path: "/home/time-capsule" },
     { label: "Weekly Check-In", path: "/home/weekly-check-in" },
     // { label: "Subscribe", path: "/offer" },
+    { label: "Habits", path: "/home/habits" },
     { label: "Profile", path: "/home/profile" },
   ];
 
