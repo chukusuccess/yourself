@@ -25,7 +25,6 @@ import Image from "next/image";
 
 import WeekGrid from "./components/WeekGrid";
 import LifeStats from "./components/LifeStats";
-import { ClockCircleFilled, FlagFilled } from "@ant-design/icons";
 import DailyAffirmation from "./components/DailyAffirmations";
 
 dayjs.extend(customParseFormat);
@@ -65,7 +64,7 @@ export default function Home() {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const prevDate = localStorage.getItem("birthdate");
+  const prevDate = localStorage?.getItem("birthdate");
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -184,7 +183,7 @@ export default function Home() {
 
   const handleChange = (date, dateString) => {
     setBirthdate(date);
-    localStorage.setItem("birthdate", date);
+    localStorage?.setItem("birthdate", date);
   };
 
   const calculateStats = (date) => {
@@ -371,7 +370,7 @@ export default function Home() {
                   onChange={handleChange}
                   placeholder="Select birthdate"
                   defaultValue={dayjs(
-                    localStorage.getItem("birthdate"),
+                    localStorage?.getItem("birthdate"),
                     customFormat
                   )}
                   minDate={dayjs("1935-01-02", customFormat)}
