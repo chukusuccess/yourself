@@ -3,7 +3,7 @@ export const TRANSLATIONS = {
     "pageTitle": "We’ll show you how far you’ve come.",
     "pageSubtitle": "Time is slipping by — quietly, invisibly.",
     "guestPageTitle": "There are 4,160 weeks in the average human life…",
-    "guestPageSubtitle": "You’ve already lived ___ of them.",
+    "guestPageSubtitle": "Track your journey, one week at a time.",
     "birthDateQuestion": "When were you born?",
     "visualizeButton": "Visualize My Time",
     "startOverButton": "Reset",

@@ -26,6 +26,7 @@ import Image from "next/image";
 import WeekGrid from "./components/WeekGrid";
 import LifeStats from "./components/LifeStats";
 import { ClockCircleFilled, FlagFilled } from "@ant-design/icons";
+import DailyAffirmation from "./components/DailyAffirmations";
 
 dayjs.extend(customParseFormat);
 const customFormat = (value) => {
@@ -63,6 +64,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
+
+  const prevDate = localStorage.getItem("birthdate");
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -114,7 +117,13 @@ export default function Home() {
     if (isModalOpen) {
       fetchRefCode();
     }
-  }, [isModalOpen]);
+
+    // const prevDate = localStorage.getItem("birthdate");
+
+    if (prevDate) {
+      setBirthdate(() => prevDate);
+    }
+  }, [isModalOpen, prevDate]);
 
   const handleRoute = async (route) => {
     const {
@@ -145,6 +154,7 @@ export default function Home() {
 
     if (freemium !== null) {
       setCurrentPage(freemium); // sets current page to "guest"
+      handleSubmit();
       intervalId = setInterval(() => {
         if (i < actualText.length) {
           setDisplayedText(actualText.slice(0, i + 1));
@@ -174,6 +184,7 @@ export default function Home() {
 
   const handleChange = (date, dateString) => {
     setBirthdate(date);
+    localStorage.setItem("birthdate", date);
   };
 
   const calculateStats = (date) => {
@@ -271,7 +282,9 @@ export default function Home() {
   };
 
   const handleSubmit = async () => {
-    setStats(calculateStats(birthdate));
+    prevDate
+      ? setStats(calculateStats(prevDate))
+      : setStats(calculateStats(birthdate));
     setStep(2);
 
     // const {
@@ -298,7 +311,7 @@ export default function Home() {
     setStats(null);
     setStep(step);
     setCurrentPage("");
-    router.push(param);
+    router.replace(param);
   };
 
   return (
@@ -357,6 +370,12 @@ export default function Home() {
                   format={customFormat}
                   onChange={handleChange}
                   placeholder="Select birthdate"
+                  defaultValue={dayjs(
+                    localStorage.getItem("birthdate"),
+                    customFormat
+                  )}
+                  minDate={dayjs("1935-01-02", customFormat)}
+                  maxDate={dayjs("2025-12-30", customFormat)}
                   style={{ width: "100%" }}
                 />
                 <Divider />
@@ -365,7 +384,7 @@ export default function Home() {
                   type="primary"
                   onClick={handleSubmit}
                   className="w-full h-16 bg-[#5a5753] text-[#eee5dc] rounded-full hover:bg-gray-500 transition-colors"
-                  disabled={!birthdate}
+                  disabled={!birthdate && !prevDate}
                 >
                   {t("visualizeButton")}
                 </Button>
@@ -373,6 +392,7 @@ export default function Home() {
             </motion.div>
           ) : (
             <>
+              <DailyAffirmation />
               <WeekGrid stats={stats} t={t} />
               <LifeStats
                 stats={stats}
@@ -469,7 +489,7 @@ export default function Home() {
               <Button
                 size="large"
                 type="primary"
-                onClick={() => handleReset(1, "/?user=")}
+                onClick={() => handleReset(1, "/")}
                 className="my-8 w-full h-16 bg-[#5a5753] text-[#eee5dc] rounded-full hover:bg-gray-500 transition-colors"
               >
                 {t("startOverButton")}

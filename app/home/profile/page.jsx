@@ -15,6 +15,7 @@ import {
   MailOutlined,
   PhoneOutlined,
   MoonFilled,
+  FilePdfOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/app/contexts/AuthProvider";
 
@@ -50,7 +51,7 @@ const Profile = () => {
     {
       key: "privacy",
       icon: <LockOutlined />,
-      label: "Privacy",
+      label: "Biography",
     },
     {
       key: "places",
@@ -145,11 +146,15 @@ const Profile = () => {
       <Modal
         open={modal === "privacy"}
         onCancel={closeModal}
-        title="Privacy Settings"
+        title="Biography"
         footer={null}
         centered
       >
-        <Button type="primary">Download a copy of your data</Button>
+        <div>Download a copy of your data</div>
+        <br />
+        <Button icon={<FilePdfOutlined />} type="primary">
+          Download
+        </Button>
       </Modal>
 
       <Modal
@@ -173,10 +178,7 @@ const Profile = () => {
         centered
       >
         <ul className="space-y-2">
-          <li>English (Selected)</li>
-          <li>Yoruba</li>
-          <li>Hausa</li>
-          <li>French</li>
+          <li>English (Default)</li>
         </ul>
       </Modal>
 
