@@ -64,7 +64,11 @@ export default function Home() {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const prevDate = localStorage?.getItem("birthdate");
+  let prevDate;
+
+  if (typeof window !== "undefined") {
+    prevDate = localStorage?.getItem("birthdate");
+  }
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -364,19 +368,21 @@ export default function Home() {
                 {t("birthDateQuestion")}
               </h2>
               <div>
-                <DatePicker
-                  size="large"
-                  format={customFormat}
-                  onChange={handleChange}
-                  placeholder="Select birthdate"
-                  defaultValue={dayjs(
-                    localStorage?.getItem("birthdate"),
-                    customFormat
-                  )}
-                  minDate={dayjs("1935-01-02", customFormat)}
-                  maxDate={dayjs("2025-12-30", customFormat)}
-                  style={{ width: "100%" }}
-                />
+                {(prevDate || birthdate) && (
+                  <DatePicker
+                    size="large"
+                    format={customFormat}
+                    onChange={handleChange}
+                    placeholder="Select birthdate"
+                    defaultValue={dayjs(
+                      localStorage?.getItem("birthdate"),
+                      customFormat
+                    )}
+                    minDate={dayjs("1935-01-02", customFormat)}
+                    maxDate={dayjs("2025-12-30", customFormat)}
+                    style={{ width: "100%" }}
+                  />
+                )}
                 <Divider />
                 <Button
                   size="large"
