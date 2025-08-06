@@ -46,6 +46,11 @@ const TimeCapsule = () => {
       <p className="w-full mb-4 px-8 text-center text-xs font-semibold">
         Messages from you to your future self
       </p>
+      {!capsules.length && (
+        <p className="text-center text-gray-300 text-2xl">
+          You haven’t created any time capsules yet.
+        </p>
+      )}
       <div className="space-y-4 text-xs font-normal flex flex-col relative noscroll h-[75vh] sm:h-full pb-16 w-full">
         {capsules.map((item, index) => {
           return (
@@ -61,11 +66,6 @@ const TimeCapsule = () => {
           );
         })}
       </div>
-      {!capsules.length && (
-        <p className="text-center text-gray-300 mt-40 text-2xl">
-          You haven’t created any time capsules yet.
-        </p>
-      )}
 
       <div className="w-full pr-8 flex item cneter justify-end mt-8 mb-10 fixed bottom-0 right-4 z-50">
         <div

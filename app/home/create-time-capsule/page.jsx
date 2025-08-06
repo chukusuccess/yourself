@@ -1,13 +1,26 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, DatePicker, Upload, Button, message } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Upload,
+  Button,
+  message,
+  Switch,
+  Select,
+} from "antd";
 import {
   AudioFilled,
   AudioOutlined,
+  CalendarOutlined,
   CloseOutlined,
+  DownOutlined,
   InboxOutlined,
   PauseCircleFilled,
+  PictureOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import supabase from "@/app/supabase";
@@ -156,11 +169,25 @@ const CreateNewTimeCapsule = () => {
     setLoading(false);
   };
 
+  const MAX_COUNT = 3;
+
+  const [value, setValue] = React.useState(["You"]);
+  const [privateCapsule, setPrivateCapsule] = React.useState(false);
+  const suffix = (
+    <>
+      <span>
+        {value.length} / {MAX_COUNT}
+      </span>
+      <DownOutlined />
+    </>
+  );
+
   return (
     <div className="p-6 sm:w-1/2 w-full mx-auto">
       {contextHolder}
       <p className="w-full mb-4 px-4 text-center text-sm font-medium text-gray-700">
-        Capture a message for the future — write it, record it, or draw it.
+        Send a message to your future self or others — write it, record it, or
+        draw it.
       </p>
 
       <Form
@@ -170,138 +197,184 @@ const CreateNewTimeCapsule = () => {
         onFinish={handleFinish}
         className="space-y-6"
       >
-        <Form.Item
-          label="Who is it from?"
-          name="from"
-          rules={[{ required: true, message: "Enter sender's name" }]}
-        >
-          <Input placeholder="e.g. Dad, Me, Future CEO" />
-        </Form.Item>
-
-        <Form.Item
-          label="Who is it for?"
-          name="to"
-          rules={[{ required: true, message: "Enter recipient" }]}
-        >
-          <Input placeholder="e.g. Myself, My daughter, Future partner" />
-        </Form.Item>
-
-        <Form.Item
-          label="Title"
-          name="title"
-          rules={[{ required: true, message: "Enter a title" }]}
-        >
-          <Input placeholder="e.g. Lessons from 2025" />
-        </Form.Item>
-
-        <Form.Item
-          label="Your Message"
-          // name="message"
-          // rules={[{ required: true, message: "Enter a message" }]}
-          className="flex flex-col gap-2 text-sm w-full"
-        >
-          <TextArea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={6}
-            className="w-full border border-gray-300 rounded-md p-3 resize-none"
-            placeholder="Type or speak your message here..."
-          />
-          {interimTranscript && (
-            <p className="italic text-gray-500">
-              Listening: {interimTranscript}
-            </p>
-          )}
-          {isListening && (
-            <div className="flex items-center gap-1 mt-2">
-              <AudioFilled />
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-1 w-1 rounded-full bg-black animate-bounce"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                />
-              ))}
-            </div>
-          )}
-          <div className="flex gap-2 mt-3">
-            {!isListening ? (
-              <Button
-                htmlType="button"
-                type="primary"
-                icon={<AudioFilled />}
-                onClick={startListening}
-                className="px-4 py-2 bg-black text-white text-sm"
-              >
-                Speak
-              </Button>
-            ) : (
-              <Button
-                htmlType="button"
-                danger
-                type="primary"
-                icon={<PauseCircleFilled />}
-                onClick={stopListening}
-                className="px-4 py-2 rounded bg-red-500 text-white text-sm"
-              >
-                Stop
-              </Button>
-            )}
-            <Button
-              htmlType="button"
-              icon={<CloseOutlined />}
-              type="default"
-              onClick={clearText}
-              className="px-4 py-2 rounded bg-gray-300 text-black text-sm"
-            >
-              Clear
-            </Button>
-          </div>
-        </Form.Item>
-
-        <Form.Item
-          label="Unlock Date"
-          name="unlockDate"
-          rules={[{ required: true, message: "Select a date in the future" }]}
-        >
-          <DatePicker
-            style={{ width: "100%" }}
-            disabledDate={(current) =>
-              current && current < dayjs().endOf("day")
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <TeamOutlined /> Recipients
+              </span>
             }
-          />
-        </Form.Item>
-
-        <Form.Item label="Add an image (optional)" name="image">
-          <Upload.Dragger
-            accept="image/*"
-            beforeUpload={() => false}
-            maxCount={1}
+            name="to"
+            rules={[{ required: true, message: "Enter recipient" }]}
           >
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">Click or drag to upload image</p>
-          </Upload.Dragger>
-        </Form.Item>
+            <div className="w-full flex items-center justify-between">
+              <div className="flex flex-col space-y-1">
+                <span>Private Capsule</span>
+                <span className="opacity-30 text-xs">
+                  Only deliver to yourself
+                </span>
+              </div>
+              <Switch
+                checked={privateCapsule}
+                onChange={() => setPrivateCapsule((prev) => !prev)}
+              />
+            </div>
+            {!privateCapsule ? (
+              <Select
+                mode="multiple"
+                maxCount={MAX_COUNT}
+                value={value}
+                style={{ width: "100%", marginTop: "24px" }}
+                onChange={setValue}
+                suffixIcon={suffix}
+                placeholder="Please select"
+                options={[
+                  { value: "you@email.example", label: "You" },
+                  { value: "cole@email.example", label: "Cole Reed" },
+                  { value: "mia@email.example", label: "Mia Blake" },
+                  { value: "jake@email.example", label: "Jake Stone" },
+                  { value: "lily@email.example", label: "Lily Lane" },
+                ]}
+                maxTagCount={"responsive"}
+              />
+            ) : null}
+          </Form.Item>
+        </div>
 
-        <Form.Item label="Add a voice message (optional)" name="audio">
-          <Upload
-            accept="audio/*"
-            beforeUpload={() => false}
-            maxCount={1}
-            listType="text"
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Enter a title" }]}
           >
-            <Button
-              className="w-full"
-              type="default"
-              htmlType="button"
-              icon={<AudioOutlined />}
+            <Input placeholder="e.g. My thoughts for 2030" />
+          </Form.Item>
+
+          <Form.Item
+            label="Your Message"
+            // name="message"
+            // rules={[{ required: true, message: "Enter a message" }]}
+            className="flex flex-col gap-2 text-sm w-full"
+          >
+            <TextArea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={6}
+              className="w-full border border-gray-300 rounded-md p-3 resize-none"
+              placeholder="Type or speak your message here..."
+            />
+            {interimTranscript && (
+              <p className="italic text-gray-500">
+                Listening: {interimTranscript}
+              </p>
+            )}
+            {isListening && (
+              <div className="flex items-center gap-1 mt-2">
+                <AudioFilled />
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-1 w-1 rounded-full bg-black animate-bounce"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2 mt-3">
+              {!isListening ? (
+                <Button
+                  htmlType="button"
+                  type="primary"
+                  icon={<AudioFilled />}
+                  onClick={startListening}
+                  className="px-4 py-2 bg-black text-white text-sm"
+                >
+                  Speak
+                </Button>
+              ) : (
+                <Button
+                  htmlType="button"
+                  danger
+                  type="primary"
+                  icon={<PauseCircleFilled />}
+                  onClick={stopListening}
+                  className="px-4 py-2 rounded bg-red-500 text-white text-sm"
+                >
+                  Stop
+                </Button>
+              )}
+              <Button
+                htmlType="button"
+                icon={<CloseOutlined />}
+                type="default"
+                onClick={clearText}
+                className="px-4 py-2 rounded bg-gray-300 text-black text-sm"
+              >
+                Clear
+              </Button>
+            </div>
+          </Form.Item>
+        </div>
+
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <CalendarOutlined /> Delivery Date
+              </span>
+            }
+            name="unlockDate"
+            rules={[{ required: true, message: "Select a date in the future" }]}
+          >
+            <DatePicker
+              style={{ width: "100%" }}
+              disabledDate={(current) =>
+                current && current < dayjs().endOf("day")
+              }
+            />
+          </Form.Item>
+        </div>
+
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <PictureOutlined /> Attachments
+              </span>
+            }
+            name="image"
+          >
+            <p className="mb-2">Add an image (optional)</p>
+            <Upload.Dragger
+              accept="image/*"
+              beforeUpload={() => false}
+              maxCount={1}
             >
-              Upload Audio
-            </Button>
-          </Upload>
-        </Form.Item>
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">Click or drag to upload image</p>
+            </Upload.Dragger>
+          </Form.Item>
+
+          <Form.Item label="Add a voice message (optional)" name="audio">
+            <Upload
+              accept="audio/*"
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="text"
+            >
+              <Button
+                className="w-full"
+                type="default"
+                htmlType="button"
+                icon={<AudioOutlined />}
+              >
+                Include Voice Note
+              </Button>
+            </Upload>
+          </Form.Item>
+        </div>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" block loading={loading}>

@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
-import { Input, Button, Switch, Select, message, Tooltip, Form } from "antd";
-import { UsergroupAddOutlined, PlusOutlined } from "@ant-design/icons";
+import { Input, Button, Switch, Select, message, Form, Radio } from "antd";
+import {
+  UsergroupAddOutlined,
+  PlusOutlined,
+  EnvironmentOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -13,6 +18,7 @@ export default function CreateHabitPage() {
   //   const supabase = useSupabaseClient();
   const { currentUser } = useAuth();
   const [isHabit, setIsHabit] = useState(true);
+  const [useGPS, setUseGPS] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [witnesses, setWitnesses] = useState([]);
@@ -83,77 +89,123 @@ export default function CreateHabitPage() {
   return (
     <div className="w-full flex flex-col gap-5 mx-auto px-4 py-10">
       {contextHolder}
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-bold h-20 text-center">
+      <div className="w-full flex flex-col">
+        <h1 className="text-xl font-bold h-20 text-center">
           {isHabit
             ? "Build a Habit"
             : "What Addiction are you trying to break?"}
         </h1>
-        <div className="flex items-center gap-2">
-          <span>Habit</span>
-          <Switch
+        <div className="w-full flex items-center gap-2">
+          <Radio.Group
+            block
+            size="large"
+            options={[
+              { label: "Build Habit", value: true },
+              { label: "Break Addiction", value: false },
+            ]}
+            defaultValue="habit"
             checked={!isHabit}
-            onChange={() => setIsHabit((prev) => !prev)}
+            onChange={(e) => setIsHabit(e.target.value)}
+            optionType="button"
+            buttonStyle="solid"
+            className="w-full text-sm"
           />
-          <span>Addiction</span>
         </div>
       </div>
       <Form layout="vertical" className="w-full flex flex-col" size="large">
-        <Form.Item
-          label="Title"
-          rules={[
-            {
-              required: true,
-              message: "Please input a title!",
-              whitespace: true,
-            },
-          ]}
-        >
-          <Input
-            size="large"
-            placeholder={
-              isHabit
-                ? "e.g. Drink 8 glasses of water 💧"
-                : "e.g. Quit smoking 🚭"
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <EditOutlined /> Title
+              </span>
             }
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mb-4"
-          />
-        </Form.Item>
-
-        <Form.Item label="Description">
-          <TextArea
-            size="large"
-            rows={4}
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mb-4"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Add Witnesses (optional)"
-          tooltip="Witnesses must confirm your habit daily before streaks count. If none added, you are your own witness."
-        >
-          <Select
-            size="large"
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Select witnesses from your family"
-            value={witnesses}
-            onChange={setWitnesses}
-            className="mb-6"
-            optionLabelProp="label"
+            rules={[
+              {
+                required: true,
+                message: "Please input a title!",
+                whitespace: true,
+              },
+            ]}
           >
-            {familyList.map((fam) => (
-              <Option key={fam.id} value={fam.id} label={fam.name}>
-                {fam.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
+            <Input
+              size="large"
+              placeholder={
+                isHabit
+                  ? "e.g. Drink 8 glasses of water 💧"
+                  : "e.g. Quit smoking 🚭"
+              }
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mb-4"
+            />
+          </Form.Item>
+
+          <Form.Item label="Description (optional)">
+            <TextArea
+              size="large"
+              rows={4}
+              placeholder="Describe your goals and motivations..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mb-4"
+            />
+          </Form.Item>
+        </div>
+
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <UsergroupAddOutlined /> Witnesses (optional)
+              </span>
+            }
+            tooltip="Witnesses must confirm your habit daily before streaks count. If none added, you are your own witness."
+          >
+            <Select
+              size="large"
+              mode="multiple"
+              style={{ width: "100%" }}
+              placeholder="Select witnesses from your friend group"
+              value={witnesses}
+              onChange={setWitnesses}
+              className="mb-6"
+              optionLabelProp="label"
+            >
+              {familyList.map((fam) => (
+                <Option key={fam.id} value={fam.id} label={fam.name}>
+                  {fam.name}
+                </Option>
+              ))}
+            </Select>
+            <span className="opacity-30 text-xs">
+              Witnesses will verify your progress and help keep you accountable
+            </span>
+          </Form.Item>
+        </div>
+
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            label={
+              <span className="text-lg font-semibold">
+                <EnvironmentOutlined /> Location Verification
+              </span>
+            }
+          >
+            <div className="w-full flex items-center justify-between">
+              <div className="flex flex-col space-y-2">
+                <span>Require GPS Verification</span>
+                <span className="opacity-30 text-xs">
+                  Verify location for habits like gym visits
+                </span>
+              </div>
+              <Switch
+                checked={false}
+                onChange={() => setUseGPS((prev) => !prev)}
+              />
+            </div>
+          </Form.Item>
+        </div>
 
         <Button
           size="large"
@@ -163,7 +215,7 @@ export default function CreateHabitPage() {
           onClick={handleSubmit}
           className="w-full"
         >
-          {isHabit ? "Add Habit" : "Add Addiction"}
+          {isHabit ? "Create Habit" : "Create Addiction"}
         </Button>
       </Form>
     </div>

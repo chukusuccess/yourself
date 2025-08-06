@@ -10,7 +10,13 @@ import {
   message,
   Typography,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  BulbOutlined,
+  PictureOutlined,
+  PlusOutlined,
+  TrophyOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
@@ -65,56 +71,98 @@ const CreateMilestone = () => {
   return (
     <div className="w-full p-6">
       {contextHolder}
-      <Title level={3}>Create a New Milestone</Title>
+      <Title level={4}>Create a New Milestone</Title>
       <Form
         size="large"
         className="w-full"
         layout="vertical"
         onFinish={onFinish}
       >
-        <Form.Item
-          name="title"
-          label="Title"
-          rules={[{ required: true, message: "Please enter a title" }]}
-        >
-          <Input placeholder="e.g. First Kiss, 10000th Day" />
-        </Form.Item>
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            name="title"
+            label={
+              <span className="text-lg font-semibold">
+                <TrophyOutlined /> Milestone Title
+              </span>
+            }
+            rules={[{ required: true, message: "Please enter a title" }]}
+          >
+            <Input placeholder="Got promoted, First kiss, etc." />
+          </Form.Item>
 
-        <Form.Item
-          name="description"
-          label="Goal / Description"
-          rules={[{ required: true, message: "Please enter a description" }]}
-        >
-          <TextArea
-            rows={3}
-            placeholder="Write about what this milestone means..."
-          />
-        </Form.Item>
+          <Form.Item
+            name="description"
+            label="Goal / Description"
+            rules={[{ required: true, message: "Please enter a description" }]}
+          >
+            <TextArea
+              rows={3}
+              placeholder="Describe what happened and why it's important..."
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="date"
-          label="Date & Time"
-          rules={[{ required: true, message: "Please select a date and time" }]}
-        >
-          <DatePicker
-            showTime
-            format="YYYY-MM-DD HH:mm"
-            style={{ width: "100%" }}
-          />
-        </Form.Item>
+          <div className="w-full flex items-center gap-5">
+            <Form.Item
+              name="date"
+              label="Date & Time"
+              rules={[
+                { required: true, message: "Please select a date and time" },
+              ]}
+            >
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
 
-        <Form.Item name="location" label="Location (optional)">
-          <Input placeholder="e.g. Lagos, Nigeria" />
-        </Form.Item>
+            <Form.Item name="location" label="Location">
+              <Input placeholder="e.g. Lagos, Nigeria" />
+            </Form.Item>
+          </div>
+        </div>
 
-        <Form.Item name="image" label="Image (optional)">
-          <Upload beforeUpload={() => false} listType="picture">
-            <Button icon={<UploadOutlined />}>Select Image</Button>
-          </Upload>
-        </Form.Item>
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            name="image"
+            label={
+              <span className="text-lg font-semibold">
+                <PictureOutlined /> Photo (optional)
+              </span>
+            }
+          >
+            <Upload beforeUpload={() => false} listType="picture">
+              <Button icon={<UploadOutlined />}>Select Image</Button>
+            </Upload>
+          </Form.Item>
+        </div>
+
+        <div className="bg-white p-6 mb-5 rounded-lg">
+          <Form.Item
+            name="reflection"
+            label={
+              <span className="text-lg font-semibold">
+                <BulbOutlined /> Personal Reflection
+              </span>
+            }
+          >
+            <p className="w-full mb-1">How did this impact your life?</p>
+            <TextArea
+              rows={3}
+              placeholder="Reflect on the lessons learnt, emotions felt, and how this milestone changed you..."
+            />
+          </Form.Item>
+        </div>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading} block>
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<PlusOutlined />}
+            loading={loading}
+            block
+          >
             Create Milestone
           </Button>
         </Form.Item>

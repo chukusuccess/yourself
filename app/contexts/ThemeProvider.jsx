@@ -1,7 +1,7 @@
 import { ConfigProvider } from "antd";
 
 const themeValues = {
-  borderRadius: 20,
+  borderRadius: 5,
   hoverColor: "#5a575330",
   Button: {
     staticColor: "#000",
