@@ -19,8 +19,8 @@ const DailyAffirmation = () => {
       </h2>
       <div className="space-y-4 text-xs font-normal text-center flex flex-col items-center justify-center">
         <div>
-          &quot;I have the power to break free from patterns that no longer
-          serve me.&quot;
+          &quot;I trust in my ability to make positive changes, one day at a
+          time.&quot;
         </div>
 
         <div className="flex items-center gap-5">

@@ -15,6 +15,7 @@ const AppNavbar = () => {
     { label: "Time Capsules", path: "/home/time-capsule" },
     { label: "Weekly Check-In", path: "/home/weekly-check-in" },
     // { label: "Subscribe", path: "/offer" },
+    { label: "Witness Network", path: "/home/witness-network" },
     { label: "Habits", path: "/home/habits" },
     { label: "Profile", path: "/home/profile" },
   ];
@@ -64,7 +65,7 @@ const AppNavbar = () => {
                 style={{ color: "#1e2939" }}
                 href={link.path}
                 onClick={() => setOpen(false)}
-                className="flex w-full items-center justify-center text-xl active:bg-gray-200 hover:bg-gray-200"
+                className="flex w-full items-center justify-center text-base font-semibold active:bg-gray-200 hover:bg-gray-200"
               >
                 {link.label}
               </Link>

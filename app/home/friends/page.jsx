@@ -163,7 +163,7 @@ export default function FriendsAndFamily() {
       <Search
         variant="filled"
         size="large"
-        className="w-full bg-white rounded-full subtle-shadow "
+        className="w-full bg-white rounded-md subtle-shadow"
         placeholder="Search friends & family..."
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ marginBottom: 16 }}

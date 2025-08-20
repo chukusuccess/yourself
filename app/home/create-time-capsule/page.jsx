@@ -205,7 +205,7 @@ const CreateNewTimeCapsule = () => {
               </span>
             }
             name="to"
-            rules={[{ required: true, message: "Enter recipient" }]}
+            // rules={[{ required: true, message: "Enter recipient" }]}
           >
             <div className="w-full flex items-center justify-between">
               <div className="flex flex-col space-y-1">
@@ -225,7 +225,7 @@ const CreateNewTimeCapsule = () => {
                 maxCount={MAX_COUNT}
                 value={value}
                 style={{ width: "100%", marginTop: "24px" }}
-                onChange={setValue}
+                onChange={(value) => setValue(value)}
                 suffixIcon={suffix}
                 placeholder="Please select"
                 options={[

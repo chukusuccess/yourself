@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input, Card, Modal, Button, List, Typography, Space } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Input, Button, Drawer, List, Typography, Space } from "antd";
+import { PlusOutlined, ShareAltOutlined } from "@ant-design/icons";
 import MilestoneCard from "../../components/MilestoneCard";
 import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { LoadingScreen } from "@/app/components/LoadingScreen";
+import Image from "next/image";
 
 const { Search } = Input;
 const { Title, Text, Paragraph } = Typography;
@@ -22,6 +23,13 @@ export default function MilestoneList() {
   const { currentUser } = useAuth();
 
   const router = useRouter();
+
+  const showDrawer = () => {
+    setModalVisible(true);
+  };
+  const onClose = () => {
+    setModalVisible(false);
+  };
 
   useEffect(() => {
     const fetchMilestones = async () => {
@@ -60,7 +68,7 @@ export default function MilestoneList() {
       <Search
         variant="filled"
         size="large"
-        className="w-full bg-white rounded-full subtle-shadow "
+        className="w-full bg-white rounded-md subtle-shadow"
         placeholder="Search milestones..."
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ marginBottom: 16 }}
@@ -85,7 +93,7 @@ export default function MilestoneList() {
                 date={item.milestone_date}
                 onClick={() => {
                   setSelected(item);
-                  setModalVisible(true);
+                  showDrawer();
                 }}
               />
             </List.Item>
@@ -93,25 +101,46 @@ export default function MilestoneList() {
         )}
       />
 
-      <Modal
+      <Drawer
+        title=""
+        placement={"bottom"}
+        size="large"
+        onClose={onClose}
         open={modalVisible}
-        title={selected?.title}
-        centered
-        footer={null}
-        onCancel={() => setModalVisible(false)}
       >
-        <Space direction="vertical">
-          <Text type="secondary">{selected?.date}</Text>
-          <Paragraph>{selected?.description}</Paragraph>
-          <Text strong>Visible to:</Text>
-          <Text>
-            {selected?.visibility?.slice(0, 3).join(", ")}
-            {selected?.visibility?.length > 3 &&
-              `, +${selected.visibility.length - 3} others`}
-          </Text>
-          <Button type="link">Manage who can see</Button>
-        </Space>
-      </Modal>
+        <div className="w-full flex flex-col items-start justify-start gap-4">
+          <Image
+            src={"/defaultmountain.jpg"}
+            width={1000}
+            height={1000}
+            quality={100}
+            alt="mtn"
+            className="rounded-xl"
+          />
+          <span className="text-xs opacity-50">{selected?.milestone_date}</span>
+          <span className="text-xs opacity-50 first-letter:uppercase">
+            in {selected?.location}
+          </span>
+          <h1 className="text-xl capitalize text-black">{selected?.title}</h1>
+          <p className="opacity-60 text-xs first-letter:capitalize">
+            {selected?.description}
+          </p>
+          <div className="w-full flex items-center justify-center opacity-60">
+            <hr className="w-full" />
+            <span className="flex items-center justify-center w-full text-xs">
+              My reflection
+            </span>
+            <hr className="w-full" />
+          </div>
+          <p className="opacity-80 text-xs italic first-letter:capitalize">
+            {/* reflection here */}
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda
+            cum quisquam expedita odio obcaecati reprehenderit ex laboriosam
+            commodi! Impedit autem mollitia odit soluta libero dolor laboriosam
+            ab blanditiis iusto labore!
+          </p>
+        </div>
+      </Drawer>
 
       <div className="w-full pr-8 flex item cneter justify-end mt-8 mb-10 fixed bottom-0 right-4 z-50">
         <div

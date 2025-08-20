@@ -2,16 +2,27 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Drawer } from "antd";
 import TimeCapsuleCard from "../../components/TimeCapsuleCard";
 import { PlusOutlined } from "@ant-design/icons";
 import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { LoadingScreen } from "@/app/components/LoadingScreen";
+import Image from "next/image";
 
 const TimeCapsule = () => {
   const [capsules, setCapsules] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   const { currentUser } = useAuth();
+
+  const showDrawer = () => {
+    setModalVisible(true);
+  };
+  const onClose = () => {
+    setModalVisible(false);
+  };
 
   const router = useRouter();
 
@@ -60,12 +71,50 @@ const TimeCapsule = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
               className="w-full"
+              onClick={() => {
+                setSelected(item);
+                showDrawer();
+              }}
             >
               <TimeCapsuleCard key={index} capsule={item} />
             </motion.div>
           );
         })}
       </div>
+
+      <Drawer
+        title=""
+        placement={"bottom"}
+        size="large"
+        onClose={onClose}
+        open={modalVisible}
+      >
+        <div className="w-full flex flex-col items-start justify-start gap-4">
+          <Image
+            src={"/defaultforest.jpg"}
+            width={1000}
+            height={1000}
+            quality={100}
+            alt="mtn"
+            className="rounded-xl"
+          />
+          <span className="text-xs opacity-50">{selected?.unlock_date}</span>
+          <span className="text-xs opacity-50 first-letter:uppercase">
+            {/* name of sender */}
+            from {selected?.user_id}
+          </span>
+          <span className="text-xs opacity-50 first-letter:uppercase">
+            {/* name of receiver */}
+            to {selected?.to_name}
+          </span>
+          <h1 className="text-xl text-black first-letter:uppercase">
+            {selected?.title}
+          </h1>
+          <p className="opacity-60 text-xs first-letter:capitalize">
+            {selected?.content}
+          </p>
+        </div>
+      </Drawer>
 
       <div className="w-full pr-8 flex item cneter justify-end mt-8 mb-10 fixed bottom-0 right-4 z-50">
         <div
