@@ -8,3 +8,8 @@ export const findMatchingLocale = (locale) => {
   );
   return match || "en-US";
 };
+
+// utils/dateUtils.js
+export const getDaysInMonth = (year, month) => {
+  return new Date(year, month + 1, 0).getDate(); // Feb -> 28/29 auto handled
+};

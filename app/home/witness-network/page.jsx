@@ -91,7 +91,6 @@ export default function WitnessNetwork() {
           </div>
         </div>
       </div>
-      ;
     </div>
   );
 }

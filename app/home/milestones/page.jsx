@@ -133,11 +133,7 @@ export default function MilestoneList() {
             <hr className="w-full" />
           </div>
           <p className="opacity-80 text-xs italic first-letter:capitalize">
-            {/* reflection here */}
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda
-            cum quisquam expedita odio obcaecati reprehenderit ex laboriosam
-            commodi! Impedit autem mollitia odit soluta libero dolor laboriosam
-            ab blanditiis iusto labore!
+            {selected?.reflection}
           </p>
         </div>
       </Drawer>

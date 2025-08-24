@@ -12,6 +12,10 @@ const WeekGrid = ({ stats, t }) => {
     const weeksPerRow = 52;
     const totalRows = Math.ceil(stats.totalWeeks / weeksPerRow);
 
+    const percentLived = Math.floor(
+      (stats.weeksLived / stats.totalWeeks) * 100
+    );
+
     for (let row = 0; row < totalRows; row++) {
       const weekCells = [];
       for (let col = 0; col < weeksPerRow; col++) {
@@ -45,23 +49,31 @@ const WeekGrid = ({ stats, t }) => {
         <div className="flex flex-col w-full items-center justify-center gap-5">
           <div className="w-full flex items-center justify-between">
             <div className="flex flex-col items-center justify-center">
-              <h2 className="text-2xl font-bold">1813</h2>
+              <h2 className="text-2xl font-bold">{stats.weeksLived}</h2>
               <span className="text-xs">weeks lived</span>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <h2 className="text-2xl font-bold">2329</h2>
+              <h2 className="text-2xl font-bold">
+                {stats.totalWeeks - stats.weeksLived}
+              </h2>
               <span className="text-xs">weeks left</span>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <h2 className="text-2xl font-bold">35</h2>
+              <h2 className="text-2xl font-bold">
+                {Math.floor(stats.weeksLived / 52)}
+              </h2>
               <span className="text-xs">years old</span>
             </div>
           </div>
           <div className="w-full mb-5">
             <span className="text-xs opacity-50">
-              you have lived 40% of the average human life span
+              you have lived {percentLived}% of the average human life span
             </span>
-            <Progress status="active" percent={40} strokeColor={"#000000"} />
+            <Progress
+              status="active"
+              percent={percentLived}
+              strokeColor={"#000000"}
+            />
           </div>
         </div>
         <h2 className="text-sm font-normal mb-4">{t("lifeInWeeksTitle")}</h2>

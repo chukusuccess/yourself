@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import PremiumAdCard from "./PremiumAdCard";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { DownOutlined } from "@ant-design/icons";
 
 const getFormattedNumber = (num) => new Intl.NumberFormat().format(num);
 
@@ -50,14 +51,17 @@ const LifeStats = ({
           onClick={() => handleAnimate("card1")}
           className="w-full text-lg font-normal text-gray-800 flex items-center justify-between"
         >
-          {t("lifeHighlightsTitle")}
-          <Image
-            src={"/life.png"}
-            alt="life"
-            width={100}
-            height={100}
-            className="h-full w-auto"
-          />
+          <div className="flex items-center gap-2">
+            <Image
+              src={"/life.png"}
+              alt="life"
+              width={20}
+              height={20}
+              className="h-full w-auto"
+            />
+            {t("lifeHighlightsTitle")}
+          </div>
+          <DownOutlined rotate={animate.card1 ? 180 : 0} />
         </h2>
         <AnimatePresence>
           {animate.card1 && (
@@ -126,14 +130,17 @@ const LifeStats = ({
           onClick={() => handleAnimate("card2")}
           className="w-full text-lg font-normal text-gray-800 flex items-center justify-between"
         >
-          {t("societalContextTitle")}
-          <Image
-            src={"/globe.png"}
-            alt="life"
-            width={100}
-            height={100}
-            className="h-full w-auto"
-          />
+          <div className="flex items-center gap-2">
+            <Image
+              src={"/globe.png"}
+              alt="life"
+              width={20}
+              height={20}
+              className="h-full w-auto"
+            />
+            {t("societalContextTitle")}
+          </div>
+          <DownOutlined rotate={animate.card2 ? 180 : 0} />
         </h2>
         <AnimatePresence>
           {animate.card2 && (
@@ -193,14 +200,17 @@ const LifeStats = ({
           onClick={() => handleAnimate("card3")}
           className="w-full text-lg font-normal text-gray-800 flex items-center justify-between"
         >
-          {t("emotionalMomentsTitle")}
-          <Image
-            src={"/vegetarian.png"}
-            alt="life"
-            width={100}
-            height={100}
-            className="h-full w-auto"
-          />
+          <div className="flex items-center gap-2">
+            <Image
+              src={"/vegetarian.png"}
+              alt="life"
+              width={20}
+              height={20}
+              className="h-full w-auto"
+            />
+            {t("emotionalMomentsTitle")}
+          </div>
+          <DownOutlined rotate={animate.card3 ? 180 : 0} />
         </h2>
         <AnimatePresence>
           {animate.card3 && (
@@ -242,14 +252,17 @@ const LifeStats = ({
           onClick={() => handleAnimate("card4")}
           className="w-full text-lg font-normal text-gray-800 flex items-center justify-between"
         >
-          {t("reflectionTitle")}
-          <Image
-            src={"/autism.png"}
-            alt="life"
-            width={100}
-            height={100}
-            className="h-full w-auto"
-          />
+          <div className="flex items-center gap-2">
+            <Image
+              src={"/autism.png"}
+              alt="life"
+              width={20}
+              height={20}
+              className="h-full w-auto"
+            />
+            {t("reflectionTitle")}
+          </div>
+          <DownOutlined rotate={animate.card4 ? 180 : 0} />
         </h2>
         <div className="space-y-2 text-xs text-gray-600 italic">
           <AnimatePresence>

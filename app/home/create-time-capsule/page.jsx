@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Form,
@@ -38,10 +38,39 @@ const CreateNewTimeCapsule = () => {
   const recognitionRef = useRef(null);
   const isRecognizing = useRef(false);
 
-  const [messageApi, contextHolder] = message.useMessage();
+  const [friends, setFriends] = useState([]);
+  const [selectedRecipients, setSelectedRecipients] = useState([]);
+  const [privateCapsule, setPrivateCapsule] = useState(false);
 
+  const [messageApi, contextHolder] = message.useMessage();
   const { currentUser } = useAuth();
 
+  // ✅ Fetch friends from DB
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!currentUser) return;
+      const { data, error } = await supabase
+        .from("friends")
+        .select("id, friend_id, profiles:friend_id(full_name)")
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error("Error fetching friends:", error.message);
+        return;
+      }
+
+      const formatted = data.map((f) => ({
+        value: f.friend_id,
+        label: f.profiles?.full_name || "Unnamed Friend",
+      }));
+
+      setFriends(formatted);
+    };
+
+    fetchFriends();
+  }, [currentUser]);
+
+  // 🎤 Speech Recognition Setup (unchanged)
   const isMobile = () =>
     typeof navigator !== "undefined" &&
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -136,8 +165,8 @@ const CreateNewTimeCapsule = () => {
     setInterimTranscript("");
   };
 
+  // ✅ Handle submit
   const handleFinish = async (values) => {
-    console.log(values);
     if (!currentUser) {
       messageApi.error("You must be signed in to create a time capsule.");
       return;
@@ -145,38 +174,60 @@ const CreateNewTimeCapsule = () => {
 
     setLoading(true);
 
-    const { title, unlockDate, to } = await values;
+    const { title, unlockDate } = values;
 
-    const { error } = await supabase.from("time_capsules").insert({
-      user_id: currentUser.id,
-      title,
-      content: text,
-      unlock_date: dayjs(unlockDate).toISOString(),
-      to_name: to,
-      to_email: null, // update if email field is added
-    });
+    // 👇 Decide private/fallback
+    const effectivePrivate =
+      privateCapsule || selectedRecipients.length === 0 ? true : false;
+
+    // Step 1: insert capsule
+    const { data: capsule, error } = await supabase
+      .from("time_capsules")
+      .insert({
+        sender_id: currentUser.id,
+        title,
+        message: text,
+        delivery_date: dayjs(unlockDate).format("YYYY-MM-DD"),
+        is_private: effectivePrivate,
+        audio_url: "",
+        image_url: "",
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Error saving capsule:", error.message);
       messageApi.error("Failed to save capsule. Please try again.");
       setLoading(false);
-    } else {
-      messageApi.success("Time capsule saved!");
-      router.push("/home/time-capsule");
-      setLoading(false);
+      return;
     }
 
+    // Step 2: insert recipients if not private
+    if (!effectivePrivate && capsule?.id) {
+      const recipientsData = selectedRecipients.map((rid) => ({
+        capsule_id: capsule.id,
+        user_id: rid,
+      }));
+
+      const { error: rError } = await supabase
+        .from("time_capsule_recipients")
+        .insert(recipientsData);
+
+      if (rError) {
+        console.error("Error saving recipients:", rError.message);
+      }
+    }
+
+    messageApi.success("Time capsule saved!");
+    router.push("/home/time-capsule");
     setLoading(false);
   };
 
   const MAX_COUNT = 3;
-
-  const [value, setValue] = React.useState(["You"]);
-  const [privateCapsule, setPrivateCapsule] = React.useState(false);
   const suffix = (
     <>
       <span>
-        {value.length} / {MAX_COUNT}
+        {selectedRecipients.length} / {MAX_COUNT}
       </span>
       <DownOutlined />
     </>
@@ -205,39 +256,34 @@ const CreateNewTimeCapsule = () => {
               </span>
             }
             name="to"
-            // rules={[{ required: true, message: "Enter recipient" }]}
           >
-            <div className="w-full flex items-center justify-between">
-              <div className="flex flex-col space-y-1">
-                <span>Private Capsule</span>
-                <span className="opacity-30 text-xs">
-                  Only deliver to yourself
-                </span>
+            <>
+              <div className="w-full flex items-center justify-between">
+                <div className="flex flex-col space-y-1">
+                  <span>Private Capsule</span>
+                  <span className="opacity-30 text-xs">
+                    Only deliver to yourself
+                  </span>
+                </div>
+                <Switch
+                  checked={privateCapsule}
+                  onChange={() => setPrivateCapsule((prev) => !prev)}
+                />
               </div>
-              <Switch
-                checked={privateCapsule}
-                onChange={() => setPrivateCapsule((prev) => !prev)}
-              />
-            </div>
-            {!privateCapsule ? (
-              <Select
-                mode="multiple"
-                maxCount={MAX_COUNT}
-                value={value}
-                style={{ width: "100%", marginTop: "24px" }}
-                onChange={(value) => setValue(value)}
-                suffixIcon={suffix}
-                placeholder="Please select"
-                options={[
-                  { value: "you@email.example", label: "You" },
-                  { value: "cole@email.example", label: "Cole Reed" },
-                  { value: "mia@email.example", label: "Mia Blake" },
-                  { value: "jake@email.example", label: "Jake Stone" },
-                  { value: "lily@email.example", label: "Lily Lane" },
-                ]}
-                maxTagCount={"responsive"}
-              />
-            ) : null}
+              {!privateCapsule ? (
+                <Select
+                  mode="multiple"
+                  maxCount={MAX_COUNT}
+                  value={selectedRecipients}
+                  style={{ width: "100%", marginTop: "24px" }}
+                  onChange={(value) => setValue(value)}
+                  suffixIcon={suffix}
+                  placeholder="Please select"
+                  options={friends}
+                  maxTagCount={"responsive"}
+                />
+              ) : null}
+            </>
           </Form.Item>
         </div>
 

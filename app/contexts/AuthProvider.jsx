@@ -10,8 +10,8 @@ import React, {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Result } from "antd";
-import supabase from "../supabase";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { AuthService } from "../services/auth.service";
 
 const AuthContext = createContext({
   currentUser: null,
@@ -28,13 +28,9 @@ const AuthProvider = ({ children }) => {
     const getAuthUser = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase.auth.getSession();
-        const session = data?.session;
-
-        if (error) throw error;
-
-        if (session?.user) {
-          setCurrentUser(session.user);
+        const res = await AuthService.getUser();
+        if (res.status === true) {
+          setCurrentUser({ id: res.$id, fullname: res.name, email: res.email });
           setIsAuthenticated(true);
         } else {
           setCurrentUser(null);
@@ -53,10 +49,10 @@ const AuthProvider = ({ children }) => {
 
   const logout = useCallback(async () => {
     setLoading(true);
-    await supabase.auth.signOut();
+    await AuthService.logout();
     setIsAuthenticated(false);
     setCurrentUser(null);
-    router.replace("/");
+    router.replace("/auth");
     setLoading(false);
   }, [router]);
 

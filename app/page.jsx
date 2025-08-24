@@ -14,7 +14,7 @@ import {
   Row,
   message,
 } from "antd";
-import { CopyOutlined } from "@ant-design/icons";
+import { CopyOutlined, MessageOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { fadeIn, animationThree } from "./resources/animation";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -99,7 +99,6 @@ export default function Home() {
 
       if (!session?.user?.id) return;
 
-      setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select("ref_code")
@@ -120,8 +119,6 @@ export default function Home() {
     if (isModalOpen) {
       fetchRefCode();
     }
-
-    // const prevDate = localStorage.getItem("birthdate");
 
     if (prevDate) {
       setBirthdate(() => prevDate);
@@ -290,18 +287,6 @@ export default function Home() {
       : setStats(calculateStats(birthdate));
     setStep(2);
 
-    // const {
-    //   data: { session },
-    // } = await supabase.auth.getSession();
-
-    // if (session) {
-    //   const userId = session.user.id;
-
-    //   await supabase
-    //     .from("profiles")
-    //     .upsert({ id: userId, birthdate: birthdate.toString() });
-    // }
-
     router.push("/?user=guest");
   };
 
@@ -412,67 +397,91 @@ export default function Home() {
                 getAverageDeathsPerDay={getAverageDeathsPerDay}
               />
               <br />
+              <div className="w-full flex items-center justify-between opacity-50">
+                <hr className="w-1/3" />
+                <span className="w-1/3 flex items-center justify-center">
+                  Quick actions
+                </span>
+                <hr className="w-1/3" />
+              </div>
+              <br />
               <div className="flex flex-col items-center justify-center">
                 <Row gutter={[24, 24]}>
                   <Col span={12}>
-                    <div
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      icon={
+                        <Image
+                          src={"/clock.png"}
+                          alt="add"
+                          width={20}
+                          height={20}
+                        />
+                      }
                       onClick={() => handleRoute("/home/create-time-capsule")}
-                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                      className="bg-white flex items-center justify-center text-center subtle-shadow"
                     >
-                      Write a Time Capsule
-                      <Image
-                        src={"/clock.png"}
-                        alt="add"
-                        width={100}
-                        height={100}
-                        className="h-1/4 w-auto"
-                      />
-                    </div>
+                      <span className="text-xs">Time Message</span>
+                    </Button>
                   </Col>
                   <Col span={12}>
-                    <div
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      icon={
+                        <Image
+                          src={"/achieve.png"}
+                          alt="add"
+                          width={20}
+                          height={20}
+                        />
+                      }
                       onClick={() => handleRoute("/home/create-milestone")}
-                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                      className="bg-white flex items-center justify-center text-center subtle-shadow"
                     >
-                      Mark a Milestone
-                      <Image
-                        src={"/achieve.png"}
-                        alt="add"
-                        width={100}
-                        height={100}
-                        className="h-1/4 w-auto"
-                      />
-                    </div>
+                      <span className="text-xs">Milestone</span>
+                    </Button>
                   </Col>
                   <Col span={12}>
-                    <div
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      icon={
+                        <Image
+                          src={"/book.png"}
+                          alt="add"
+                          width={20}
+                          height={20}
+                        />
+                      }
                       onClick={() => handleRoute("/home/create-habit")}
-                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                      className="bg-white flex items-center justify-center text-center subtle-shadow"
                     >
-                      Add a New Habit
-                      <Image
-                        src={"/book.png"}
-                        alt="add"
-                        width={100}
-                        height={100}
-                        className="h-1/4 w-auto"
-                      />
-                    </div>
+                      <span className="text-xs">New Habit</span>
+                    </Button>
                   </Col>
                   <Col span={12}>
-                    <div
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      icon={
+                        <Image
+                          src={"/family.png"}
+                          alt="add"
+                          width={20}
+                          height={20}
+                        />
+                      }
                       onClick={() => handleRoute("/home/invite-loved-one")}
-                      className="bg-white p-6 rounded-xl aspect-square flex flex-col items-center justify-center text-center subtle-shadow"
+                      className="bg-white flex items-center justify-center text-center subtle-shadow"
                     >
-                      Invite Family or Friends
-                      <Image
-                        src={"/family.png"}
-                        alt="add"
-                        width={100}
-                        height={100}
-                        className="h-1/4 w-auto"
-                      />
-                    </div>
+                      <span className="text-xs">Invite Friends</span>
+                    </Button>
                   </Col>
                 </Row>
               </div>

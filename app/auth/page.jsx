@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import supabase from "../supabase";
 import { useRouter } from "next/navigation";
+import { AuthService } from "../services/auth.service";
 
 const { Title, Text, Link } = Typography;
 
@@ -21,38 +22,73 @@ const AuthPage = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
 
-    const { email, password, name } = values;
+    const { email, password, name } = await values;
 
-    let result;
-    if (isSignUp) {
-      result = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name },
-          emailRedirectTo: "https://yourself-virid.vercel.app/auth",
-        },
-      });
-    } else {
-      result = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      if (isSignUp === true) {
+        const res = await AuthService.createUser({
+          email: email,
+          password: password,
+          fullName: name,
+        });
+        if (res.status === true) {
+          messageApi.success("Account created!");
+          const res = await AuthService.login({
+            email: email,
+            password: password,
+          });
+          if (res.userId) {
+            setLoading(true);
+            router.replace("/");
+          }
+        }
+      }
+      if (isSignUp === false) {
+        const res = await AuthService.login({
+          email: email,
+          password: password,
+        });
+        if (res.userId) {
+          setLoading(true);
+          router.replace("/");
+        }
+      }
+    } catch (error) {
+      messageApi.error("An error occured");
+      console.log("appwrite auth error", error);
+    } finally {
+      setLoading(false);
     }
 
-    setLoading(false);
+    // let result;
+    // if (isSignUp) {
+    //   result = await supabase.auth.signUp({
+    //     email,
+    //     password,
+    //     options: {
+    //       data: { full_name: name },
+    //       emailRedirectTo: "https://yourself-virid.vercel.app/auth",
+    //     },
+    //   });
+    // } else {
+    //   result = await supabase.auth.signInWithPassword({ email, password });
+    // }
 
-    if (result.error) {
-      messageApi.error(result.error.message, 3);
-      console.log("supabase response from error:", result);
-    } else {
-      messageApi.success(
-        isSignUp ? "Check your email to confirm!" : "Signed in successfully"
-      );
-      console.log("supabase response from success:", result);
-      !isSignUp ? router.replace("/") : router.replace("/auth");
-    }
+    // setLoading(false);
+
+    // if (result.error) {
+    //   messageApi.error(result.error.message, 3);
+    //   console.log("supabase response from error:", result);
+    // } else {
+    //   messageApi.success(
+    //     isSignUp ? "Check your email to confirm!" : "Signed in successfully"
+    //   );
+    //   console.log("supabase response from success:", result);
+    //   !isSignUp ? router.replace("/") : router.replace("/auth");
+    // }
   };
 
   const onFinish = (values) => {
-    console.log("Submitted:", values);
     handleSubmit(values);
   };
 

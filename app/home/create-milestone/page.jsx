@@ -39,21 +39,19 @@ const CreateMilestone = () => {
       return;
     }
 
+    const formData = await values;
+
     const selectedDate = dayjs(values.date);
-    const now = dayjs();
 
     const payload = {
-      user_id: currentUser.id,
-      title: values.title,
-      description: values.description,
-      milestone_date: selectedDate.toISOString(),
-      location: values.location || "",
+      // user_id: currentUser.id,
+      title: formData.title,
+      description: formData.description,
+      milestone_date: selectedDate.format("YYYY-MM-DD"), // matches column type
+      location: formData.location || "",
+      image_url: "",
+      reflection: formData.reflection || "",
     };
-
-    // Only include is_future if the selected date is in the future
-    if (selectedDate.isAfter(now)) {
-      payload.is_future = true;
-    }
 
     console.log("Milestone Data:", payload);
 
@@ -105,16 +103,10 @@ const CreateMilestone = () => {
           <div className="w-full flex items-center gap-5">
             <Form.Item
               name="date"
-              label="Date & Time"
-              rules={[
-                { required: true, message: "Please select a date and time" },
-              ]}
+              label="Date"
+              rules={[{ required: true, message: "Please select a date" }]}
             >
-              <DatePicker
-                showTime
-                format="YYYY-MM-DD HH:mm"
-                style={{ width: "100%" }}
-              />
+              <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
             </Form.Item>
 
             <Form.Item name="location" label="Location">
@@ -144,10 +136,13 @@ const CreateMilestone = () => {
             label={
               <span className="text-lg font-semibold">
                 <BulbOutlined /> Personal Reflection
+                <br />
+                <p className="text-xs font-normal w-full mb-1">
+                  How did this impact your life?
+                </p>
               </span>
             }
           >
-            <p className="w-full mb-1">How did this impact your life?</p>
             <TextArea
               rows={3}
               placeholder="Reflect on the lessons learnt, emotions felt, and how this milestone changed you..."
