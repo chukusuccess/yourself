@@ -13,3 +13,12 @@ export const findMatchingLocale = (locale) => {
 export const getDaysInMonth = (year, month) => {
   return new Date(year, month + 1, 0).getDate(); // Feb -> 28/29 auto handled
 };
+
+// generate unique ref-code
+export const generateReferralCode = (userId) => {
+  // simple base36 hash from userId
+  return (
+    userId.slice(0, 6).toUpperCase() +
+    Math.random().toString(36).substring(2, 6).toUpperCase()
+  );
+};

@@ -64,11 +64,11 @@ const Profile = () => {
           <div className="w-full flex flex-col items-center justify-center mb-5 gap-5">
             <div className="w-full flex items-center gap-5">
               <div className="bg-gray-100 text-xl rounded-full w-14 h-14 flex items-center justify-center font-bold">
-                {currentUser?.user_metadata?.full_name[0].toUpperCase()}
+                {currentUser?.fullname[0].toUpperCase()}
               </div>
               <div className="flex flex-col items-start justify-start">
                 <span className="text-center font-semibold text-lg">
-                  {currentUser?.user_metadata?.full_name}
+                  {currentUser?.fullname}
                 </span>
                 <span className="text-center text-xs opacity-50">
                   {currentUser?.email}

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   Form,
@@ -18,7 +17,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import supabase from "@/app/supabase";
+import { MilestoneService } from "@/app/services/milestone.service";
 import { useAuth } from "@/app/contexts/AuthProvider";
 
 const { Title } = Typography;
@@ -31,39 +30,42 @@ const CreateMilestone = () => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values) => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    if (!currentUser) {
-      messageApi.error("You must be logged in.");
+      if (!currentUser) {
+        messageApi.error("You must be logged in.");
+        setLoading(false);
+        return;
+      }
+
+      const formData = await values;
+
+      const selectedDate = dayjs(values.date);
+
+      const payload = {
+        user_id: currentUser.id,
+        title: formData.title,
+        description: formData.description,
+        milestone_date: selectedDate.format("YYYY-MM-DD"), // matches column type
+        location: formData.location || "",
+        image_url: "",
+        reflection: formData.reflection || "",
+      };
+
+      console.log("Milestone Data:", payload);
+
+      const res = await MilestoneService.createMilestone(payload);
+
+      if (res.$id) {
+        messageApi.success("Milestone created successfully!");
+      }
+    } catch (error) {
+      console.error("Error creating milestone:", error);
+      messageApi.error("Error creating milestone.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const formData = await values;
-
-    const selectedDate = dayjs(values.date);
-
-    const payload = {
-      // user_id: currentUser.id,
-      title: formData.title,
-      description: formData.description,
-      milestone_date: selectedDate.format("YYYY-MM-DD"), // matches column type
-      location: formData.location || "",
-      image_url: "",
-      reflection: formData.reflection || "",
-    };
-
-    console.log("Milestone Data:", payload);
-
-    const { error } = await supabase.from("milestones").insert(payload);
-
-    if (error) {
-      messageApi.error("Error creating milestone: " + error.message);
-    } else {
-      messageApi.success("Milestone created successfully!");
-    }
-
-    setLoading(false);
   };
 
   return (

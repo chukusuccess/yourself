@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { Form, Input, Button, Typography, message } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import supabase from "../supabase";
 import { useRouter } from "next/navigation";
 import { AuthService } from "../services/auth.service";
+import { UserService } from "../services/user.service";
+import { generateReferralCode } from "../resources/utils";
 
 const { Title, Text, Link } = Typography;
 
@@ -26,31 +27,48 @@ const AuthPage = () => {
 
     try {
       if (isSignUp === true) {
-        const res = await AuthService.createUser({
+        // 1) create user
+        const createdUser = await AuthService.createUser({
           email: email,
           password: password,
           fullName: name,
         });
-        if (res.status === true) {
-          messageApi.success("Account created!");
-          const res = await AuthService.login({
-            email: email,
-            password: password,
+
+        if (createdUser.$id) {
+          // 2) generate referral code
+          const refCode = generateReferralCode(createdUser.$id);
+
+          // 3) login
+          const session = await AuthService.login({
+            email,
+            password,
           });
-          if (res.userId) {
-            setLoading(true);
-            router.replace("/");
+
+          if (session) {
+            // 4) create profile
+            const profile = await UserService.createUserProfile({
+              user_id: createdUser.$id,
+              full_name: name,
+              avatar_url: "",
+              ref_code: refCode,
+            });
+
+            if (profile) {
+              messageApi.success("Account created!");
+              router.replace("/");
+              return;
+            }
           }
         }
-      }
-      if (isSignUp === false) {
-        const res = await AuthService.login({
-          email: email,
-          password: password,
+      } else {
+        const session = await AuthService.login({
+          email,
+          password,
         });
-        if (res.userId) {
+        if (session) {
           setLoading(true);
           router.replace("/");
+          return;
         }
       }
     } catch (error) {
@@ -59,33 +77,6 @@ const AuthPage = () => {
     } finally {
       setLoading(false);
     }
-
-    // let result;
-    // if (isSignUp) {
-    //   result = await supabase.auth.signUp({
-    //     email,
-    //     password,
-    //     options: {
-    //       data: { full_name: name },
-    //       emailRedirectTo: "https://yourself-virid.vercel.app/auth",
-    //     },
-    //   });
-    // } else {
-    //   result = await supabase.auth.signInWithPassword({ email, password });
-    // }
-
-    // setLoading(false);
-
-    // if (result.error) {
-    //   messageApi.error(result.error.message, 3);
-    //   console.log("supabase response from error:", result);
-    // } else {
-    //   messageApi.success(
-    //     isSignUp ? "Check your email to confirm!" : "Signed in successfully"
-    //   );
-    //   console.log("supabase response from success:", result);
-    //   !isSignUp ? router.replace("/") : router.replace("/auth");
-    // }
   };
 
   const onFinish = (values) => {

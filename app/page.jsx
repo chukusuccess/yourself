@@ -14,11 +14,10 @@ import {
   Row,
   message,
 } from "antd";
-import { CopyOutlined, MessageOutlined } from "@ant-design/icons";
+import { CopyOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { fadeIn, animationThree } from "./resources/animation";
 import { useRouter, useSearchParams } from "next/navigation";
-import supabase from "./supabase";
 
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import Image from "next/image";
@@ -26,6 +25,8 @@ import Image from "next/image";
 import WeekGrid from "./components/WeekGrid";
 import LifeStats from "./components/LifeStats";
 import DailyAffirmation from "./components/DailyAffirmations";
+import { UserService } from "./services/user.service";
+import { AuthService } from "./services/auth.service";
 
 dayjs.extend(customParseFormat);
 const customFormat = (value) => {
@@ -93,27 +94,18 @@ export default function Home() {
 
   useEffect(() => {
     const fetchRefCode = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user?.id) return;
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("ref_code")
-        .eq("id", session.user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching ref_code:", error);
-        messageApi.error("Could not load invite link.");
-      } else {
-        const url = `https://yourself-virid.vercel.app/home/friends?ref=${data.ref_code}`;
-        setInviteLink(url);
+      try {
+        const link = await UserService.getReferralLink();
+        if (link) {
+          setInviteLink(link);
+        } else {
+          messageApi.error("Could not load invite link.");
+        }
+      } catch (err) {
+        messageApi.error("Error fetching referral link.");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     if (isModalOpen) {
@@ -126,9 +118,7 @@ export default function Home() {
   }, [isModalOpen, prevDate]);
 
   const handleRoute = async (route) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const session = await AuthService.getUser();
 
     if (session && route === "/home/invite-loved-one") {
       showModal();
@@ -324,11 +314,11 @@ export default function Home() {
                 currentPage === "guest" ? "/pocketwatch.png" : "/silhouette.png"
               }
               alt="cover"
-              width={1000}
-              height={1000}
+              width={500}
+              height={500}
             />
             <motion.h1
-              className="text-2xl text-center font-normal mb-2"
+              className="text-2xl text-center font-normal"
               variants={fadeIn("up", "tween", 2, 1)}
               initial="hidden"
               animate="show"
@@ -336,9 +326,7 @@ export default function Home() {
               {currentPage === "guest" ? t("guestPageTitle") : t("pageTitle")}
             </motion.h1>
           </motion.div>
-
-          <br />
-          <p className="text-gray-400 text-sm text-center mb-8">
+          <p className="text-gray-400 text-sm text-center my-2">
             {displayedText}
           </p>
           <br />

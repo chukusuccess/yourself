@@ -3,16 +3,16 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input, Button, Drawer, List, Typography, Space } from "antd";
-import { PlusOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { Input, Button, Drawer, List } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import MilestoneCard from "../../components/MilestoneCard";
 import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { LoadingScreen } from "@/app/components/LoadingScreen";
 import Image from "next/image";
+import { MilestoneService } from "@/app/services/milestone.service";
 
 const { Search } = Input;
-const { Title, Text, Paragraph } = Typography;
 
 export default function MilestoneList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,17 +36,13 @@ export default function MilestoneList() {
       if (!currentUser) return;
 
       setLoading(true);
-
-      const { data, error } = await supabase
-        .from("milestones")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("milestone_date", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching milestones:", error.message);
-      } else {
-        setMilestones(data);
+      try {
+        const docs = await MilestoneService.listMilestones(currentUser.id);
+        setMilestones(docs);
+      } catch (error) {
+        console.error("Error fetching milestones:", error);
+      } finally {
+        setLoading(false);
       }
 
       setLoading(false);

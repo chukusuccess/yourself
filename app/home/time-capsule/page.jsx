@@ -5,23 +5,34 @@ import { useRouter } from "next/navigation";
 import { Drawer } from "antd";
 import TimeCapsuleCard from "../../components/TimeCapsuleCard";
 import { PlusOutlined } from "@ant-design/icons";
-import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { LoadingScreen } from "@/app/components/LoadingScreen";
 import Image from "next/image";
+import { CapsuleService } from "@/app/services/capsule.service";
+import dayjs from "dayjs";
 
 const TimeCapsule = () => {
   const [capsules, setCapsules] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [lockedVisible, setLockedVisible] = useState(false);
   const { currentUser } = useAuth();
 
-  const showDrawer = () => {
-    setModalVisible(true);
+  const showDrawer = (date) => {
+    const d = dayjs(date);
+    const now = dayjs();
+
+    const isFuture = d.isAfter(now, "day");
+    if (isFuture) {
+      setLockedVisible(true);
+    } else {
+      setModalVisible(true);
+    }
   };
   const onClose = () => {
     setModalVisible(false);
+    setLockedVisible(false);
   };
 
   const router = useRouter();
@@ -30,19 +41,14 @@ const TimeCapsule = () => {
     const fetchCapsules = async () => {
       if (!currentUser) return;
 
-      const { data, error } = await supabase
-        .from("time_capsules")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching capsules:", error.message);
-      } else {
+      try {
+        const data = await CapsuleService.listTimeCapsules(currentUser.id);
         setCapsules(data);
+      } catch (err) {
+        console.error("Error fetching capsules:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchCapsules();
@@ -73,7 +79,7 @@ const TimeCapsule = () => {
               className="w-full"
               onClick={() => {
                 setSelected(item);
-                showDrawer();
+                showDrawer(item.delivery_date);
               }}
             >
               <TimeCapsuleCard key={index} capsule={item} />
@@ -98,20 +104,37 @@ const TimeCapsule = () => {
             alt="mtn"
             className="rounded-xl"
           />
-          <span className="text-xs opacity-50">{selected?.unlock_date}</span>
+          <span className="text-xs opacity-50">{selected?.delivery_date}</span>
           <span className="text-xs opacity-50 first-letter:uppercase">
             {/* name of sender */}
-            from {selected?.user_id}
+            from {selected?.sender_id}
           </span>
           <span className="text-xs opacity-50 first-letter:uppercase">
             {/* name of receiver */}
-            to {selected?.to_name}
+            to {selected?.is_private === true ? "Me" : "Others"}
           </span>
           <h1 className="text-xl text-black first-letter:uppercase">
             {selected?.title}
           </h1>
           <p className="opacity-60 text-xs first-letter:capitalize">
-            {selected?.content}
+            {selected?.message}
+          </p>
+        </div>
+      </Drawer>
+
+      <Drawer
+        title=""
+        placement={"bottom"}
+        size="large"
+        onClose={onClose}
+        open={lockedVisible}
+      >
+        <div className="w-full flex flex-col items-start justify-start gap-4">
+          <h1 className="text-xl text-black first-letter:uppercase">
+            This Message is still Locked.
+          </h1>
+          <p className="opacity-60 text-xs first-letter:capitalize">
+            Wait until {selected?.delivery_date} to view.
           </p>
         </div>
       </Drawer>

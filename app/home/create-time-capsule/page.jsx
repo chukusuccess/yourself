@@ -23,8 +23,9 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
+import { CapsuleService } from "@/app/services/capsule.service";
+import { UserService } from "@/app/services/user.service";
 
 const { TextArea } = Input;
 
@@ -49,20 +50,7 @@ const CreateNewTimeCapsule = () => {
   useEffect(() => {
     const fetchFriends = async () => {
       if (!currentUser) return;
-      const { data, error } = await supabase
-        .from("friends")
-        .select("id, friend_id, profiles:friend_id(full_name)")
-        .eq("user_id", currentUser.id);
-
-      if (error) {
-        console.error("Error fetching friends:", error.message);
-        return;
-      }
-
-      const formatted = data.map((f) => ({
-        value: f.friend_id,
-        label: f.profiles?.full_name || "Unnamed Friend",
-      }));
+      const formatted = await UserService.listFriends(currentUser.id);
 
       setFriends(formatted);
     };
@@ -180,10 +168,8 @@ const CreateNewTimeCapsule = () => {
     const effectivePrivate =
       privateCapsule || selectedRecipients.length === 0 ? true : false;
 
-    // Step 1: insert capsule
-    const { data: capsule, error } = await supabase
-      .from("time_capsules")
-      .insert({
+    try {
+      const formData = {
         sender_id: currentUser.id,
         title,
         message: text,
@@ -191,36 +177,21 @@ const CreateNewTimeCapsule = () => {
         is_private: effectivePrivate,
         audio_url: "",
         image_url: "",
-      })
-      .select()
-      .single();
+      };
 
-    if (error) {
-      console.error("Error saving capsule:", error.message);
+      const capsule = await CapsuleService.createTimeCapsule(
+        formData,
+        selectedRecipients
+      );
+
+      messageApi.success("Time capsule saved!");
+      router.push("/home/time-capsule");
+    } catch (err) {
+      console.error("Error saving capsule:", err);
       messageApi.error("Failed to save capsule. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Step 2: insert recipients if not private
-    if (!effectivePrivate && capsule?.id) {
-      const recipientsData = selectedRecipients.map((rid) => ({
-        capsule_id: capsule.id,
-        user_id: rid,
-      }));
-
-      const { error: rError } = await supabase
-        .from("time_capsule_recipients")
-        .insert(recipientsData);
-
-      if (rError) {
-        console.error("Error saving recipients:", rError.message);
-      }
-    }
-
-    messageApi.success("Time capsule saved!");
-    router.push("/home/time-capsule");
-    setLoading(false);
   };
 
   const MAX_COUNT = 3;
@@ -257,7 +228,7 @@ const CreateNewTimeCapsule = () => {
             }
             name="to"
           >
-            <>
+            <div>
               <div className="w-full flex items-center justify-between">
                 <div className="flex flex-col space-y-1">
                   <span>Private Capsule</span>
@@ -276,14 +247,14 @@ const CreateNewTimeCapsule = () => {
                   maxCount={MAX_COUNT}
                   value={selectedRecipients}
                   style={{ width: "100%", marginTop: "24px" }}
-                  onChange={(value) => setValue(value)}
                   suffixIcon={suffix}
                   placeholder="Please select"
                   options={friends}
                   maxTagCount={"responsive"}
+                  onChange={(values) => setSelectedRecipients(values)}
                 />
               ) : null}
-            </>
+            </div>
           </Form.Item>
         </div>
 

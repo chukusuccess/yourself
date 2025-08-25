@@ -7,7 +7,7 @@ export class AuthService {
   }
 
   static async createUser({ email, password, fullName }) {
-    const res = await account.create(generateID, email, password, fullName);
+    const res = await account.create(generateID(), email, password, fullName);
     return res;
   }
 

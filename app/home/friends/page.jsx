@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input, Modal, List, message, Empty, Avatar } from "antd";
 import { CopyOutlined, PlusOutlined } from "@ant-design/icons";
-import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { LoadingScreen } from "@/app/components/LoadingScreen";
+import { UserService } from "@/app/services/user.service";
 
 const { Search } = Input;
 
@@ -47,43 +47,33 @@ export default function FriendsAndFamily() {
 
   useEffect(() => {
     const fetchFriends = async () => {
-      if (!currentUser?.id) return;
-      setLoading(true);
+      if (!currentUser) return;
+      try {
+        const formatted = await UserService.listFriends(currentUser.id);
 
-      const { data, error } = await supabase
-        .from("friends")
-        .select("*")
-        .eq("user_id", currentUser?.id)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        messageApi.error("Unable to fetch friends.");
-      } else {
-        setFriends(data);
+        setFriends(formatted);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     const fetchRefCode = async () => {
       if (!currentUser) return;
 
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("ref_code")
-        .eq("id", currentUser.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching ref_code:", error);
-        messageApi.error("Could not load invite link.");
-      } else {
-        const url = `https://yourself-virid.vercel.app/home/friends?ref=${data.ref_code}`;
-        setInviteLink(url);
+      try {
+        const link = await UserService.getReferralLink();
+        if (link) {
+          setInviteLink(link);
+        } else {
+          messageApi.error("Could not load invite link.");
+        }
+      } catch (err) {
+        messageApi.error("Error fetching referral link.");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     if (isInviteModalOpen) {
@@ -98,20 +88,22 @@ export default function FriendsAndFamily() {
     const fetchInviter = async () => {
       if (!refCode) return;
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name,")
-        .eq("ref_code", refCode)
-        .single();
+      try {
+        const inviterProfile = await UserService.getInviterByRefCode(refCode);
 
-      if (error || !data) {
-        messageApi.error("Invalid or expired invite link.");
-        router.replace("/home/friends"); // Clean URL
-        return;
+        if (!inviterProfile) {
+          messageApi.error("Invalid or expired invite link.");
+          router.replace("/home/friends");
+          return;
+        }
+
+        setInviter(inviterProfile);
+        setIsModalOpen(true);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
       }
-
-      setInviter(data);
-      setIsModalOpen(true);
     };
 
     fetchInviter();
@@ -119,22 +111,11 @@ export default function FriendsAndFamily() {
 
   // ✅ Handle accepting the invite
   const handleAccept = async () => {
-    if (!currentUser?.id || !inviter?.id) return;
+    if (!currentUser?.id || !inviter?.$id) return;
 
-    const { error } = await supabase.rpc("add_mutual_friend", {
-      a_id: currentUser.id,
-      a_name: currentUser.user_metadata.full_name || "Unnamed",
-      a_email: currentUser.email,
-      a_image: currentUser.user_metadata.avatar_url || null,
+    const res = await UserService.addMutualFriends(currentUser.id, inviter.$id);
 
-      b_id: inviter.id,
-      b_name: inviter.full_name || "Unnamed",
-      b_email: inviter.email || null,
-      b_image: inviter.image_url || null,
-    });
-
-    if (error) {
-      console.error(error);
+    if (!res.success) {
       messageApi.error("Failed to accept invite.");
       return;
     }
@@ -150,7 +131,7 @@ export default function FriendsAndFamily() {
   };
 
   const filtered = friends.filter((item) =>
-    item.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    item.label?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -183,15 +164,21 @@ export default function FriendsAndFamily() {
               transition={{ delay: index * 0.1, duration: 0.4 }}
               className="w-full"
             >
-              <List.Item>
+              <List.Item className="flex items-center">
                 <List.Item.Meta
+                  className="flex items-center"
                   avatar={
-                    <Avatar src={item.image_url}>
-                      {item.name?.[0]?.toUpperCase()}
+                    <Avatar size={48} src={item.avatar_url}>
+                      {item.label?.[0]?.toUpperCase()}
                     </Avatar>
                   }
-                  title={item.name}
-                  description={item.email}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                  title={item.label}
+                  description="mutual friend"
                 />
               </List.Item>
             </motion.div>
@@ -205,16 +192,16 @@ export default function FriendsAndFamily() {
         open={isModalOpen}
         onOk={handleAccept}
         okText="Accept"
-        cancelText="Ignore"
+        cancelText="Decline"
         onCancel={handleIgnore}
       >
         <div className="flex flex-col items-center text-center space-y-3">
-          <Avatar size={64}>
+          <Avatar size={48}>
             {inviter?.full_name?.[0]?.toUpperCase() || "?"}
           </Avatar>
-          <p>
-            <strong>{inviter?.full_name}</strong> has invited you to connect as
-            a friend. Would you like to accept?
+          <p className="my-4">
+            <strong className="text-xl">{inviter?.full_name}</strong> <br />
+            wants to connect as a friend.
           </p>
         </div>
       </Modal>
