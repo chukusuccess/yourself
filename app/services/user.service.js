@@ -9,7 +9,7 @@ import {
 } from "./appwrite";
 
 export class UserService {
-  static async createUserProfile(formData) {
+  static async createUserProfile() {
     const res = databases.createDocument(
       dbID,
       profileCollectionID,
@@ -59,11 +59,12 @@ export class UserService {
     const profilesRes = await databases.listDocuments(
       dbID,
       profileCollectionID,
-      [query.equal("$id", friendIds)]
+      [query.equal("$id", [...friendIds])]
     );
 
     return res.documents.map((f) => {
       const profile = profilesRes.documents.find((p) => p.$id === f.friend_id);
+      console.log(profile);
       return {
         value: f.friend_id,
         label: profile?.full_name,

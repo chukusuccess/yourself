@@ -1,7 +1,7 @@
-import { query } from "./appwrite";
 import {
   databases,
   generateID,
+  query,
   dbID,
   capsuleCollectionID,
   capsuleRecipientCollectionID,

@@ -30,5 +30,9 @@ export const friendsCollectionID =
   process.env.NEXT_PUBLIC_APPWRITE_FRIENDS_COLLECTION_ID;
 export const profileCollectionID =
   process.env.NEXT_PUBLIC_APPWRITE_PROFILE_COLLECTION_ID;
+export const verificationRequestsCollectionID =
+  process.env.NEXT_PUBLIC_APPWRITE_VERIFICATION_REQUESTS_COLLECTION_ID;
 export const milestonesCollectionID =
   process.env.NEXT_PUBLIC_APPWRITE_MILESTONES_COLLECTION_ID;
+export const checkinsCollectionID =
+  process.env.NEXT_PUBLIC_APPWRITE_CHECKINS_COLLECTION_ID;

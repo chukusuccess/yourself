@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal, Switch, Button, Typography, message } from "antd";
 import {
-  UserOutlined,
   TeamOutlined,
   LogoutOutlined,
   DeleteOutlined,

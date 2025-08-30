@@ -1,17 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Segmented, List, Button, message, Empty, Progress } from "antd";
+import { Segmented, List, message, Empty } from "antd";
 import { motion } from "framer-motion";
-import supabase from "@/app/supabase";
-import {
-  ClockCircleOutlined,
-  DeleteFilled,
-  EyeOutlined,
-  PlusOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthProvider";
+import { HabitService } from "@/app/services/habit.service";
+import { StreakService } from "@/app/services/streak.service";
+import { HabitCard } from "@/app/components/HabitCard";
+import { VerificationService } from "@/app/services/verification.service";
 
 const HabitsAndAddictions = () => {
   const [activeTab, setActiveTab] = useState("Habits");
@@ -25,47 +22,91 @@ const HabitsAndAddictions = () => {
   const { currentUser } = useAuth();
   const userId = currentUser?.id;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) return;
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("habits")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        messageApi.error("Failed to fetch data.");
-        setLoading(false);
-        return;
-      }
-
+  // make fetchData available to handlers
+  const fetchData = async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const data = await HabitService.listHabits(userId);
       setHabits(data.filter((item) => item.type === "habit"));
       setAddictions(data.filter((item) => item.type === "addiction"));
+    } catch (err) {
+      console.error("Failed to fetch data.", err);
+      messageApi.error("Failed to fetch data.");
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [userId]);
 
-  const handleDelete = async (id) => {
-    const { error } = await supabase
-      .from("habits_addictions")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      messageApi.error("Failed to delete.");
+  // ✅ handle verify (self-verify) - wired to StreakService
+  const handleVerify = async (habit) => {
+    if (!currentUser?.id) {
+      messageApi.error("You must be signed in to verify.");
       return;
     }
 
-    messageApi.success("Deleted successfully.");
-    if (activeTab === "Habits") {
-      setHabits((prev) => prev.filter((item) => item.id !== id));
-    } else {
-      setAddictions((prev) => prev.filter((item) => item.id !== id));
+    const habitId = habit.$id || habit.id;
+    setLoading(true);
+    try {
+      await StreakService.verifyHabit(habitId, currentUser.id);
+      messageApi.success("Verified for today ✅");
+      // refresh list so UI shows updated streak metadata
+      await fetchData();
+    } catch (err) {
+      console.error("Error verifying habit:", err);
+      messageApi.error("Failed to verify habit.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ handle witness-request flow
+  const handleRequestVerification = async (habit) => {
+    if (!currentUser?.id) {
+      messageApi.error("You must be signed in to request verification.");
+      return;
+    }
+
+    if (!habit.witnesses || habit.witnesses.length === 0) {
+      messageApi.warning("No witnesses assigned to this habit.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // create a request per witness
+      const res = await VerificationService.createRequests(
+        habit.$id,
+        currentUser.id,
+        habit.witnesses
+      );
+
+      console.log(res);
+
+      messageApi.success("Verification request(s) sent ✅");
+    } catch (err) {
+      console.error("Error creating request(s):", err);
+      messageApi.error("Failed to send verification request.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await HabitService.deleteHabit(id);
+      messageApi.success("Deleted successfully.");
+      if (activeTab === "Habits") {
+        setHabits((prev) => prev.filter((item) => item.$id !== id));
+      } else {
+        setAddictions((prev) => prev.filter((item) => item.$id !== id));
+      }
+    } catch (err) {
+      messageApi.error("Failed to delete.");
     }
   };
 
@@ -95,6 +136,7 @@ const HabitsAndAddictions = () => {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
+        className="mb-10"
       >
         <br />
         {listData.length === 0 ? (
@@ -103,97 +145,25 @@ const HabitsAndAddictions = () => {
           <List
             loading={loading}
             dataSource={listData}
+            pagination={{
+              pageSize: 8,
+              showSizeChanger: false,
+              align: "center",
+            }}
             renderItem={(item, index) => (
               <List.Item key={index}>
-                <div className="w-full bg-white rounded-xl p-6">
-                  <div className="w-full flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span className="font-semibold text-lg">
-                          {item.title}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-blue-500 text-xs text-white px-3 py-[0.75]">
-                          Building
-                        </span>
-                        •<span className="text-xs">2 witnesses</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end justify-end">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-lg">12</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs">day streak</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full my-4">
-                    <span className="text-xs opacity-50 w-full flex items-center justify-between">
-                      <span>Progress to goal</span>{" "}
-                      <span className="text-black font-bold">12/30 days</span>
-                    </span>
-                    <Progress
-                      status="active"
-                      percent={80}
-                      strokeColor={"#000000"}
-                    />
-                  </div>
-                  <div className="w-full">
-                    <span className="flex items-center mb-2">
-                      <UsergroupAddOutlined />
-                      <span>Witnesses</span>
-                    </span>
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="flex items-center gap-2 border border-[#c2c2c2] rounded-full px-2 text-xs">
-                        <EyeOutlined />
-                        Sarah M.
-                      </span>
-                      <span className="flex items-center gap-2 border border-[#c2c2c2] rounded-full px-2 text-xs">
-                        <EyeOutlined />
-                        Jack M.
-                      </span>
-                    </span>
-                  </div>
-                  <div className="w-full">
-                    <span className="flex items-center gap-2 mb-2 opacity-50 mt-5">
-                      <ClockCircleOutlined />
-                      <span>Last Verified: Yesterday</span>
-                    </span>
-                    <span className="flex items-center justify-between">
-                      <Button
-                        className="text-xs"
-                        type="primary"
-                        htmlType="button"
-                      >
-                        Request Verification
-                      </Button>
-                      <Button
-                        className="text-xs"
-                        type="default"
-                        htmlType="button"
-                      >
-                        Give up
-                      </Button>
-                      <Button
-                        className="text-xs"
-                        // onClick={() => handleDelete(item.id)}
-                        type="primary"
-                        htmlType="button"
-                        danger
-                      >
-                        <DeleteFilled />
-                      </Button>
-                    </span>
-                  </div>
-                </div>
+                <HabitCard
+                  habit={item}
+                  onDelete={handleDelete}
+                  onVerify={() => handleVerify(item)}
+                  onRequestVerification={() => handleRequestVerification(item)}
+                />
               </List.Item>
             )}
           />
         )}
       </motion.div>
+      <br />
 
       <div className="w-full pr-8 flex item cneter justify-end mt-8 mb-10 fixed bottom-0 right-4 z-50">
         <div

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import supabase from "@/app/supabase";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { Input, Button, Switch, Select, message, Form, Radio } from "antd";
 import {
@@ -10,12 +9,13 @@ import {
   EnvironmentOutlined,
   EditOutlined,
 } from "@ant-design/icons";
+import { UserService } from "@/app/services/user.service";
+import { HabitService } from "@/app/services/habit.service";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
 export default function CreateHabitPage() {
-  //   const supabase = useSupabaseClient();
   const { currentUser } = useAuth();
   const [isHabit, setIsHabit] = useState(true);
   const [useGPS, setUseGPS] = useState(false);
@@ -27,63 +27,47 @@ export default function CreateHabitPage() {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const fetchFamily = async () => {
-    const { data, error } = await supabase
-      .from("friends")
-      .select("id, name")
-      .eq("user_id", currentUser.id);
-
-    if (error) {
+  const fetchFriends = async () => {
+    try {
+      const list = await UserService.listFriends(currentUser?.id);
+      setFamilyList(list);
+    } catch (err) {
       messageApi.error("Failed to fetch family");
-    } else {
-      setFamilyList(data);
     }
   };
 
   useEffect(() => {
-    if (currentUser) fetchFamily();
+    if (currentUser) fetchFriends();
   }, [currentUser]);
 
   const handleSubmit = async () => {
     if (!title.trim()) return messageApi.warning("Please enter a title");
+    if (!currentUser?.id) return;
 
     setLoading(true);
 
-    const id = await currentUser.id;
+    try {
+      await HabitService.createHabit(
+        {
+          user_id: currentUser.id,
+          title,
+          description,
+          type: isHabit ? "habit" : "addiction",
+          location_based: useGPS,
+        },
+        witnesses
+      );
 
-    const { data: habit, error } = await supabase
-      .from("habits")
-      .insert({
-        user_id: id,
-        title,
-        description,
-        type: isHabit ? "habit" : "addiction",
-        witness_required: witnesses.length > 0,
-      })
-      .select()
-      .single();
-
-    if (error) {
+      messageApi.success(`${isHabit ? "Habit" : "Addiction"} created!`);
+      setTitle("");
+      setDescription("");
+      setWitnesses([]);
+    } catch (err) {
+      console.error(err);
       messageApi.error("Failed to create");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (witnesses.length > 0) {
-      const witnessRows = witnesses.map((wid) => ({
-        habit_id: habit.id,
-        witness_id: wid,
-        status: "pending",
-        date: new Date().toISOString().split("T")[0],
-      }));
-      await supabase.from("habit_witnesses").insert(witnessRows);
-    }
-
-    messageApi.success(`${isHabit ? "Habit" : "Addiction"} created!`);
-    setTitle("");
-    setDescription("");
-    setWitnesses([]);
-    setLoading(false);
   };
 
   return (
@@ -103,7 +87,7 @@ export default function CreateHabitPage() {
               { label: "Build Habit", value: true },
               { label: "Break Addiction", value: false },
             ]}
-            defaultValue="habit"
+            value={isHabit}
             checked={!isHabit}
             onChange={(e) => setIsHabit(e.target.value)}
             optionType="button"
@@ -173,8 +157,8 @@ export default function CreateHabitPage() {
               optionLabelProp="label"
             >
               {familyList.map((fam) => (
-                <Option key={fam.id} value={fam.id} label={fam.name}>
-                  {fam.name}
+                <Option key={fam.value} value={fam.value} label={fam.label}>
+                  {fam.label}
                 </Option>
               ))}
             </Select>
@@ -201,6 +185,7 @@ export default function CreateHabitPage() {
               </div>
               <Switch
                 checked={false}
+                value={useGPS}
                 onChange={() => setUseGPS((prev) => !prev)}
               />
             </div>

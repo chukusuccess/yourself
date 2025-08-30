@@ -1,5 +1,5 @@
-import { query } from "./appwrite";
 import {
+  query,
   databases,
   generateID,
   dbID,
