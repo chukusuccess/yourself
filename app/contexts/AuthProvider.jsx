@@ -30,8 +30,16 @@ const AuthProvider = ({ children }) => {
       try {
         const res = await AuthService.getUser();
         if (res.status === true) {
-          setCurrentUser({ id: res.$id, fullname: res.name, email: res.email });
+          const fullName = res.name || "";
+          const firstName = fullName.split(" ")[0]; // ✅ take only first word
+
+          setCurrentUser({ id: res.$id, fullname: fullName, email: res.email });
           setIsAuthenticated(true);
+
+          if (typeof window !== "undefined") {
+            localStorage.setItem("username", firstName); // ✅ save trimmed name
+            localStorage.setItem("user_id", res.$id);
+          }
         } else {
           setCurrentUser(null);
           setIsAuthenticated(false);
